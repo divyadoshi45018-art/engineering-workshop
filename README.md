@@ -1,18 +1,27 @@
-# Engineering Workshop
+# Engineering Workshop — 3D Design Lab
 
-A free, phone-friendly starter 3D assembly playground built with Three.js.
+Live demo: https://divyadoshi45018-art.github.io/engineering-workshop/
 
-## Publish on GitHub Pages
-1. Upload `index.html`, `style.css`, `app.js`, and `README.md` to the root of a GitHub repository.
-2. Commit the files to the `main` branch.
-3. Open **Settings → Pages**.
-4. Select **Deploy from a branch**, choose `main` and `/(root)`, then Save.
-5. Open the published Pages URL. Internet is required to load Three.js from its CDN.
+A phone-friendly browser prototype for exploring mechanical assemblies and simple electrical circuits in a 3D bench.
 
 ## Current features
-- Expandable visual parts library: block, cylinder, sphere, cone, ring, gear, shaft, wheel, bearing, washer, bolt, spring, DC motor, battery, LED, switch, circuit board, and wire. These are simplified visual stand-ins, not manufacturer-accurate parts.
-- Select, rotate, scale up/down, duplicate, recolour, delete, and undo recent edits.
-- Orbit/zoom view, drag-move in the ground plane, and step-based X/Y/Z movement plus X/Y/Z rotation controls.
-- Save/load design in browser local storage with separate Save and Load controls.
+- Full-screen 3D viewport, orbit, zoom, grid toggle and responsive layout.
+- Component library with grouped 3D geometry: blocks, cylinders, spheres, cones, rings, toothed gears, shafts, wheels, bearing rings/balls, washers, threaded bolts, springs, a DC motor, base plate, battery, LED, bulb, switch, resistor, IC chip and wire piece.
+- Select, drag-move, move in X/Y/Z, rotate around X/Y/Z, scale, duplicate, delete, recolour and undo.
+- Approximate length/height/width controls in millimetres. The scale is illustrative (1 scene unit = 10 mm), not certified CAD dimensions.
+- Assembly connection mode: tap one part, then another to add a visible connector link. Links are saved with the project.
+- Learning circuit demo: add a battery, switch, resistor and LED or bulb; connect the four parts into a loop (each has two links); turn the switch ON; press Run circuit. The light mesh glows when the demo's connection checks pass. Stop the simulation to turn the glow off.
+- Save/load uses localStorage in the current browser on the current device.
 
-This is a learning prototype, not a validated CAD tool. Dimensions and parts are illustrative; there is no true physics, gear meshing, electrical simulation, or AI model generation yet. Undo history is temporary and clears when the page reloads.
+## Use the circuit demo
+1. Add a battery, switch, resistor and LED or bulb.
+2. Turn **Connect parts** on. Tap pairs to make these links: battery–switch, switch–resistor, resistor–LED/bulb, LED/bulb–battery.
+3. Select the switch and tap **Toggle switch** until it is ON.
+4. Press **Run circuit**. A complete loop should glow; an incomplete loop shows a status message.
+5. Press **Stop** to stop the simulation.
+
+## Limitations
+This is a learning prototype, not a manufacturing-grade CAD system or a validated electrical simulator. Parts and dimensions are approximate; connection links are visual assembly/electrical links rather than physical constraints; no true collision solver, mesh export, circuit voltage/current calculation, component datasheets or electrical safety checking is implemented. A glowing lamp demonstrates simple circuit logic only and does not guarantee a real circuit will work safely.
+
+## Development
+The page loads Three.js and OrbitControls from jsDelivr CDN, so the first load requires internet access. It is a static GitHub Pages site; no build step is required.
