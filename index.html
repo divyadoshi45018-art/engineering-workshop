@@ -4,78 +4,73 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0b1018">
-<title>Engineering Workshop | 3D Design Lab</title>
+<title>Engineering Workshop | 3D Build Lab</title>
 <link rel="stylesheet" href="style.css">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
 <body>
 <header>
-  <div><span class="eyebrow">BUILD · ASSEMBLE · TEST</span><h1>Engineering Workshop <small>LAB 02</small></h1></div>
-  <div class="header-actions"><button id="loadBtn">Load</button><button id="saveBtn" class="primary">Save</button><button id="fullscreenBtn" title="Full screen">⛶</button></div>
+  <div class="brand"><span class="eyebrow">BUILD · CONNECT · TEST</span><h1>Engineering Workshop</h1></div>
+  <div class="header-actions"><button id="loadBtn">Load</button><button id="saveBtn" class="primary">Save</button><button id="fullscreenBtn" aria-label="Fullscreen">⛶</button></div>
 </header>
 <main>
-<section class="workspace">
-  <div class="viewport-wrap" id="viewportWrap">
-    <div id="viewport" aria-label="Interactive 3D engineering workspace"></div>
-    <div class="view-hint">Drag empty space to orbit · pinch to zoom · tap a part to select</div>
-    <div class="viewport-tools"><button id="resetViewBtn">Reset view</button><button id="gridBtn">Grid: ON</button></div>
-    <div id="status" role="status">Loading workshop…</div>
-  </div>
-  <div class="quickbar">
-    <button id="undoBtn" disabled>↶ Undo</button><button id="moveBtn">✥ Drag move</button><button id="duplicateBtn">Duplicate</button><button id="deleteBtn" class="danger">Delete</button>
-  </div>
-  <div class="editor-grid">
-    <section class="card">
-      <div class="section-head"><h2>Transform & dimensions</h2><span id="selectedName">No selection</span></div>
-      <div class="three-actions"><button id="rotateBtn">Rotate Y +15°</button><button id="scaleBtn">Scale +</button><button id="scaleDownBtn">Scale −</button><button id="colorBtn">Change colour</button></div>
-      <div class="dimension-grid">
-        <label>Length (mm)<input id="dimX" type="number" min="1" max="5000" step="1" value="15"></label>
-        <label>Height (mm)<input id="dimY" type="number" min="1" max="5000" step="1" value="10"></label>
-        <label>Width (mm)<input id="dimZ" type="number" min="1" max="5000" step="1" value="10"></label>
+  <section class="work-column">
+    <section class="bench">
+      <div class="bench-head"><div><strong>3D BENCH</strong><span id="partCount">0 parts</span></div><div class="bench-actions"><button id="resetViewBtn">Reset view</button><button id="gridBtn">Grid: ON</button></div></div>
+      <div class="viewport-wrap" id="viewportWrap">
+        <div id="viewport" aria-label="Interactive 3D engineering workspace"></div>
+        <div class="view-hint">Drag to orbit · pinch to zoom · tap a part to select</div>
+        <div id="status" role="status">Loading workshop…</div>
       </div>
-      <button id="applyDimensionsBtn" class="wide">Apply dimensions</button>
-      <div class="axis-grid">
-        <div class="axis-title">MOVE · 2.5 mm step</div>
-        <span>X</span><button data-move="x,-0.25">−</button><button data-move="x,0.25">+</button>
-        <span>Y</span><button data-move="y,-0.25">−</button><button data-move="y,0.25">+</button>
-        <span>Z</span><button data-move="z,-0.25">−</button><button data-move="z,0.25">+</button>
-      </div>
-      <div class="axis-grid rotate-grid">
-        <div class="axis-title">ROTATE · 15° step</div>
-        <span>X</span><button data-rotate="x,-15">−15°</button><button data-rotate="x,15">+15°</button>
-        <span>Y</span><button data-rotate="y,-15">−15°</button><button data-rotate="y,15">+15°</button>
-        <span>Z</span><button data-rotate="z,-15">−15°</button><button data-rotate="z,15">+15°</button>
+      <div class="quickbar">
+        <button id="undoBtn" disabled>↶ Undo</button><button id="moveBtn">✥ Move part</button><button id="duplicateBtn">Duplicate</button><button id="deleteBtn" class="danger">Delete</button><button id="clearBtn" class="danger-outline">Clear bench</button>
       </div>
     </section>
-    <section class="card assembly-card">
-      <div class="section-head"><h2>Assembly & connections</h2><span id="connectionCount">0 links</span></div>
-      <p class="muted">Select two parts in the 3D view to join them. Links appear as visible connector wires; this is a prototype, not a manufacturing-grade joint solver.</p>
-      <button id="connectModeBtn" class="wide">＋ Connect parts: OFF</button>
-      <button id="disconnectBtn" class="wide secondary">Remove last connection</button>
-      <div class="section-head subhead"><h3>Electrical bench</h3><span>DC demo circuit</span></div>
+
+    <section class="card component-card">
+      <div class="section-head"><div><h2>Parts tray</h2><p>Tap to add a 3D part to the bench.</p></div><span id="selectedName">No selection</span></div>
+      <div class="part-groups">
+        <div class="part-group"><h3>Basic</h3><div class="parts-grid">
+          <button class="part" data-part="box"><span>▰</span><b>Block</b></button><button class="part" data-part="cylinder"><span>▤</span><b>Cylinder</b></button><button class="part" data-part="sphere"><span>●</span><b>Sphere</b></button><button class="part" data-part="cone"><span>▲</span><b>Cone</b></button><button class="part" data-part="torus"><span>◉</span><b>Ring</b></button><button class="part" data-part="board"><span>▦</span><b>Base plate</b></button>
+        </div></div>
+        <div class="part-group"><h3>Mechanical</h3><div class="parts-grid">
+          <button class="part" data-part="gear"><span>⚙</span><b>Gear</b></button><button class="part" data-part="shaft"><span>━</span><b>Shaft</b></button><button class="part" data-part="wheel"><span>◉</span><b>Wheel</b></button><button class="part" data-part="bearing"><span>◎</span><b>Bearing</b></button><button class="part" data-part="washer"><span>⊙</span><b>Washer</b></button><button class="part" data-part="bolt"><span>↟</span><b>Bolt</b></button><button class="part" data-part="spring"><span>〰</span><b>Spring</b></button><button class="part" data-part="motor"><span>▣</span><b>DC motor</b></button>
+        </div></div>
+        <div class="part-group"><h3>Electronics</h3><div class="parts-grid">
+          <button class="part" data-part="battery"><span>▥</span><b>Battery</b></button><button class="part" data-part="switch"><span>⏻</span><b>Switch</b></button><button class="part" data-part="resistor"><span>▰</span><b>Resistor</b></button><button class="part" data-part="led"><span>✦</span><b>LED</b></button><button class="part" data-part="bulb"><span>◉</span><b>Bulb</b></button><button class="part" data-part="chip"><span>▦</span><b>IC chip</b></button><button class="part" data-part="wire"><span>〰</span><b>Wire</b></button>
+        </div></div>
+      </div>
+    </section>
+
+    <details class="card advanced">
+      <summary>Advanced part controls <span>Move · rotate · dimensions · colour</span></summary>
+      <div class="advanced-body">
+        <div class="three-actions"><button id="rotateBtn">Rotate Y +15°</button><button id="scaleBtn">Scale +</button><button id="scaleDownBtn">Scale −</button><button id="colorBtn">Change colour</button></div>
+        <div class="dimension-grid">
+          <label>Length (mm)<input id="dimX" type="number" min="1" max="5000" step="1" value="15"></label>
+          <label>Height (mm)<input id="dimY" type="number" min="1" max="5000" step="1" value="10"></label>
+          <label>Width (mm)<input id="dimZ" type="number" min="1" max="5000" step="1" value="10"></label>
+        </div>
+        <button id="applyDimensionsBtn" class="wide">Apply dimensions</button>
+        <div class="axis-grid"><div class="axis-title">MOVE · 2.5 mm step</div><span>X</span><button data-move="x,-0.25">−</button><button data-move="x,0.25">+</button><span>Y</span><button data-move="y,-0.25">−</button><button data-move="y,0.25">+</button><span>Z</span><button data-move="z,-0.25">−</button><button data-move="z,0.25">+</button></div>
+        <div class="axis-grid rotate-grid"><div class="axis-title">ROTATE · 15° step</div><span>X</span><button data-rotate="x,-15">−15°</button><button data-rotate="x,15">+15°</button><span>Y</span><button data-rotate="y,-15">−15°</button><button data-rotate="y,15">+15°</button><span>Z</span><button data-rotate="z,-15">−15°</button><button data-rotate="z,15">+15°</button></div>
+      </div>
+    </details>
+  </section>
+
+  <aside class="side-column">
+    <section class="card circuit-card">
+      <div class="section-head"><div><h2>Electrical bench</h2><p>Build and test a simple DC loop.</p></div><span class="live-tag">SIM</span></div>
       <div class="circuit-status" id="circuitStatus"><span class="status-dot"></span><span>Simulation stopped</span></div>
-      <div class="three-actions"><button id="runCircuitBtn" class="primary">▶ Run circuit</button><button id="stopCircuitBtn">■ Stop</button><button id="toggleSwitchBtn">Toggle switch</button></div>
-      <p class="muted small">Add a battery, switch, resistor and LED/bulb. Connect them into a loop with the Connect tool, then run the simulation. The light glows only when the demo circuit is complete and the switch is on.</p>
-      <button id="clearBtn" class="wide danger-outline">Clear all parts</button>
+      <div class="circuit-buttons"><button id="runCircuitBtn" class="primary">▶ Run</button><button id="stopCircuitBtn">■ Stop</button><button id="toggleSwitchBtn">Switch ON/OFF</button></div>
+      <button id="connectModeBtn" class="wide">＋ Connect parts: OFF</button>
+      <div class="connection-row"><span id="connectionCount">0 links</span><button id="disconnectBtn" class="secondary">Undo last link</button></div>
+      <div class="recipe"><b>Quick test: glowing light</b><ol><li>Add one battery, switch, resistor and LED or bulb.</li><li>Turn <b>Connect parts</b> on.</li><li>Tap in this order: battery → switch → resistor → light → battery.</li><li>Tap Run. Turn the switch on to light it.</li></ol><p>Each connection is a simulated wire. This is a learning demo, not a real-world circuit safety checker.</p></div>
     </section>
-  </div>
-</section>
-<aside class="library card">
-  <div class="section-head"><h2>Component library</h2><span id="partCount">0 parts</span></div>
-  <p class="muted">Tap a component to add it to the 3D bench. These are grouped 3D assemblies, not flat icons.</p>
-  <div class="library-group"><h3>Structural & shapes</h3><div class="parts-grid">
-    <button class="part" data-part="box"><span>▰</span><b>Block</b></button><button class="part" data-part="cylinder"><span>▤</span><b>Cylinder</b></button><button class="part" data-part="sphere"><span>●</span><b>Sphere</b></button><button class="part" data-part="cone"><span>▲</span><b>Cone</b></button><button class="part" data-part="torus"><span>◉</span><b>Ring</b></button><button class="part" data-part="board"><span>▦</span><b>Base plate</b></button>
-  </div></div>
-  <div class="library-group"><h3>Mechanical components</h3><div class="parts-grid">
-    <button class="part" data-part="gear"><span>⚙</span><b>Gear</b></button><button class="part" data-part="shaft"><span>━</span><b>Shaft</b></button><button class="part" data-part="wheel"><span>◉</span><b>Wheel</b></button><button class="part" data-part="bearing"><span>◎</span><b>Bearing</b></button><button class="part" data-part="washer"><span>⊙</span><b>Washer</b></button><button class="part" data-part="bolt"><span>↟</span><b>Threaded bolt</b></button><button class="part" data-part="spring"><span>〰</span><b>Spring</b></button><button class="part" data-part="motor"><span>▣</span><b>DC motor</b></button>
-  </div></div>
-  <div class="library-group"><h3>Electronics & circuit parts</h3><div class="parts-grid">
-    <button class="part" data-part="battery"><span>▥</span><b>Battery</b></button><button class="part" data-part="led"><span>✦</span><b>LED</b></button><button class="part" data-part="bulb"><span>◉</span><b>Bulb</b></button><button class="part" data-part="switch"><span>⏻</span><b>Switch</b></button><button class="part" data-part="resistor"><span>▰</span><b>Resistor</b></button><button class="part" data-part="chip"><span>▦</span><b>IC chip</b></button><button class="part" data-part="wire"><span>〰</span><b>Wire piece</b></button>
-  </div></div>
-  <div class="library-footer"><b>Build recipe: glowing bulb</b><ol><li>Add battery, switch, resistor and LED/bulb.</li><li>Turn Connect parts ON.</li><li>Tap parts in sequence to make a loop, including the final return connection to the battery.</li><li>Run circuit. Toggle the switch to test ON/OFF.</li></ol></div>
-  <p class="note">Scale note: the dimensions panel is a visual design scale (1 scene unit = 10 mm). Component dimensions are approximate. Electrical simulation is a learning demo, not a real circuit design or safety checker.</p>
-</aside>
+    <section class="card how-card"><h2>How to use the bench</h2><ul><li><b>Orbit:</b> drag empty space.</li><li><b>Select:</b> tap a part.</li><li><b>Move:</b> turn Move part on, then drag a part.</li><li><b>Connect:</b> enable Connect parts, then tap two parts.</li><li><b>Save:</b> stores this project in this browser on this device.</li></ul></section>
+  </aside>
 </main>
+<footer>Approximate visual dimensions · no collision solver or manufacturing-grade CAD · needs internet for the 3D engine.</footer>
 <script type="module" src="app.js"></script>
 </body>
 </html>
