@@ -11,8 +11,8 @@ A free, phone-friendly starter 3D assembly playground built with Three.js.
 
 ## Current features
 - Primitive parts library: block, cylinder, sphere, visual gear, shaft.
-- Select, rotate, scale, duplicate, recolour, delete.
+- Select, rotate, scale, duplicate, recolour, delete, and undo recent edits.
 - Orbit/zoom view and a move mode for repositioning parts.
-- Save/load design in browser local storage.
+- Save/load design in browser local storage with separate Save and Load controls.
 
-This is a learning prototype, not a validated CAD tool. Dimensions and parts are illustrative; there is no true physics, gear meshing, electrical simulation, or AI model generation yet.
+This is a learning prototype, not a validated CAD tool. Dimensions and parts are illustrative; there is no true physics, gear meshing, electrical simulation, or AI model generation yet. Undo history is temporary and clears when the page reloads.
