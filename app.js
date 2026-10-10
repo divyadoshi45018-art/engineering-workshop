@@ -41,6 +41,10 @@ function createPart(type,position=null,opts={}){
  case'wheel':name='Wheel';addMesh(g,new THREE.CylinderGeometry(.65,.65,.32,40),dark,[0,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.TorusGeometry(.52,.075,12,40),material(0x343f4b),[0,0,0],[0,Math.PI/2,0]);addMesh(g,new THREE.CylinderGeometry(.18,.18,.4,24),metal,[0,0,0],[0,0,Math.PI/2]);break;
  case'bearing':name='Bearing';addMesh(g,makeRingGeometry(.58,.39,.18),metal);addMesh(g,makeRingGeometry(.34,.22,.2),metal);for(let i=0;i<8;i++){const a=i*Math.PI/4;addMesh(g,new THREE.SphereGeometry(.075,12,10),material(0xc8d4df,.9,.2),[Math.cos(a)*.365,.1,Math.sin(a)*.365]);}break;
  case'washer':name='Washer';addMesh(g,makeRingGeometry(.55,.25,.1),metal);break;
+ case'nut':name='Hex nut';addMesh(g,new THREE.CylinderGeometry(.34,.34,.18,6),metal);addMesh(g,new THREE.CylinderGeometry(.19,.19,.205,24),dark);addMesh(g,new THREE.TorusGeometry(.19,.025,8,24),metal,[0,.105,0],[Math.PI/2,0,0]);break;
+ case'pulley':name='Pulley';addMesh(g,new THREE.CylinderGeometry(.48,.48,.28,32),metal,[0,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.TorusGeometry(.38,.08,12,32),dark,[0,0,0],[0,Math.PI/2,0]);addMesh(g,new THREE.CylinderGeometry(.17,.17,.34,24),metal,[0,0,0],[0,0,Math.PI/2]);break;
+ case'bracket':name='L bracket';addMesh(g,new THREE.BoxGeometry(1,.12,.22),metal,[0,0,0]);addMesh(g,new THREE.BoxGeometry(.12,.8,.22),metal,[-.44,.34,0]);for(let i=0;i<2;i++)addMesh(g,new THREE.TorusGeometry(.065,.018,8,20),dark,[-.44+i*.68,.07,.116],[0,0,0]);break;
+ case'hinge':name='Hinge';addMesh(g,new THREE.BoxGeometry(.48,.12,.38),metal,[-.27,0,0]);addMesh(g,new THREE.BoxGeometry(.48,.12,.38),metal,[.27,0,0]);for(let i=0;i<3;i++)addMesh(g,new THREE.CylinderGeometry(.075,.075,.22,20),dark,[0,-.22+i*.22,0]);addMesh(g,new THREE.CylinderGeometry(.035,.035,.82,16),metal,[0,0,0]);break;
  case'bolt':name='Threaded bolt';addMesh(g,new THREE.CylinderGeometry(.13,.13,1.1,16),metal);addMesh(g,new THREE.CylinderGeometry(.28,.28,.22,6),metal,[0,.62,0]);addThread(g,.145,.82,metal,9);break;
  case'spring':name='Spring';makeSpring(g);addMesh(g,new THREE.CylinderGeometry(.3,.3,.08,24),dark,[0,-.72,0]);addMesh(g,new THREE.CylinderGeometry(.3,.3,.08,24),dark,[0,.72,0]);break;
  case'motor':name='DC motor';addMesh(g,new THREE.CylinderGeometry(.43,.43,1.05,32),material(0x526779,.65,.3),[0,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.38,.38,.16,32),dark,[-.57,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.38,.38,.16,32),metal,[.57,0,0],[0,0,Math.PI/2]);g.userData.motorShaft=addMesh(g,new THREE.CylinderGeometry(.09,.09,.72,20),metal,[.92,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.BoxGeometry(.22,.18,.2),material(0x202a36),[-.12,-.5,.12]);addMesh(g,new THREE.BoxGeometry(.22,.18,.2),material(0x202a36),[.15,-.5,.12]);break;
@@ -100,6 +104,7 @@ function localPorts(p){
  if(t==='bulb')return [new THREE.Vector3(-.07,-.43,0),new THREE.Vector3(.07,-.43,0)];
  if(t==='chip')return [new THREE.Vector3(-.4,0,0),new THREE.Vector3(.4,0,0)];
  if(t==='motor')return [new THREE.Vector3(-.16,-.58,.12),new THREE.Vector3(.17,-.58,.12)];
+ if(t==='wire')return [new THREE.Vector3(-.8,0,0),new THREE.Vector3(.8,0,0)];
  return [new THREE.Vector3(0,0,0)];
 }
 function worldPorts(p){return localPorts(p).map(v=>p.localToWorld(v.clone()));}
@@ -125,8 +130,8 @@ function refreshConnectionVisuals(){
 }
 function autoFitMechanical(a,b){
  const ta=a.userData.type,tb=b.userData.type;
- const shaftTarget=(ta==='shaft'&&['wheel','bearing','gear','washer','torus','motor'].includes(tb))?{shaft:a,target:b}:
-                  (tb==='shaft'&&['wheel','bearing','gear','washer','torus','motor'].includes(ta))?{shaft:b,target:a}:null;
+ const shaftTarget=(ta==='shaft'&&['wheel','bearing','gear','washer','torus','pulley','motor'].includes(tb))?{shaft:a,target:b}:
+                  (tb==='shaft'&&['wheel','bearing','gear','washer','torus','pulley','motor'].includes(ta))?{shaft:b,target:a}:null;
  if(shaftTarget){
    const {shaft,target}=shaftTarget,tt=target.userData.type;
    if(tt==='motor'){shaft.rotation.set(0,0,Math.PI/2);shaft.position.copy(target.localToWorld(new THREE.Vector3(1.24,0,0)));}
@@ -144,6 +149,8 @@ function autoFitMechanical(a,b){
    b.position.copy(a.position).add(new THREE.Vector3(1.58,0,0));b.position.y=a.position.y;b.rotation.y=a.rotation.y;
    return 'Gears positioned for meshing';
  }
+ if((ta==='bolt'&&tb==='nut')||(ta==='nut'&&tb==='bolt')){const bolt=ta==='bolt'?a:b,nut=ta==='nut'?a:b;nut.position.copy(bolt.position).add(new THREE.Vector3(0,-.22,0));return 'Nut fitted to threaded bolt';}
+ if((ta==='pulley'&&tb==='shaft')||(ta==='shaft'&&tb==='pulley')){const pulley=ta==='pulley'?a:b,shaft=ta==='shaft'?a:b;shaft.rotation.set(0,0,Math.PI/2);shaft.position.copy(pulley.position);return 'Shaft aligned through pulley';}
  if((ta==='bolt'&&tb==='washer')||(ta==='washer'&&tb==='bolt')){
    const bolt=ta==='bolt'?a:b,washer=ta==='washer'?a:b;washer.position.copy(bolt.position).add(new THREE.Vector3(0,-.52,0));return 'Washer placed under bolt head';
  }
@@ -164,7 +171,8 @@ function connectParts(a,b){
  let link={a:a.userData.id,b:b.userData.id,kind:isElectrical?'electrical':'assembly'};
  if(isElectrical){
    const ap=worldPorts(a),bp=worldPorts(b);let best=Infinity,ai=0,bi=0;
-   ap.forEach((pa,i)=>bp.forEach((pb,j)=>{const d=pa.distanceToSquared(pb);if(d<best){best=d;ai=i;bi=j;}}));
+   const portUsed=(id,index)=>connections.some(c=>c.kind==='electrical'&&((c.a===id&&(c.aPort??0)===index)||(c.b===id&&(c.bPort??0)===index)));
+   ap.forEach((pa,i)=>bp.forEach((pb,j)=>{const usedPenalty=(portUsed(a.userData.id,i)?1000:0)+(portUsed(b.userData.id,j)?1000:0);const d=pa.distanceToSquared(pb)+usedPenalty;if(d<best){best=d;ai=i;bi=j;}}));
    link.aPort=ai;link.bPort=bi;link.color=(a.userData.type==='battery'&&ai===0)||(b.userData.type==='battery'&&bi===0)?0xe95d5d:0xf1b65d;
  }else{
    const note=autoFitMechanical(a,b);if(note){link.autoFitted=true;say(note);}
@@ -208,7 +216,7 @@ function getCircuitParts(){return {battery:parts.find(p=>p.userData.type==='batt
 function circuitIsClosed(){const c=getCircuitParts();if(!c.battery||!c.switch)return {ok:false,reason:'Add a battery and switch first.'};const hasEdge=(a,b)=>connections.some(link=>(link.a===a&&link.b===b)||(link.a===b&&link.b===a));let ids,expected,kind;if(c.lamp){if(!c.resistor)return {ok:false,reason:'Add a resistor in series with the LED/bulb.'};ids=[c.battery.userData.id,c.switch.userData.id,c.resistor.userData.id,c.lamp.userData.id];expected=[[ids[0],ids[1]],[ids[1],ids[2]],[ids[2],ids[3]],[ids[3],ids[0]]];kind='light';if(connections.filter(link=>ids.includes(link.a)&&ids.includes(link.b)).length!==4||!expected.every(([a,b])=>hasEdge(a,b)))return {ok:false,reason:'Wire the loop: battery → switch → resistor → light → battery.'};}else if(c.motor){ids=[c.battery.userData.id,c.switch.userData.id,c.motor.userData.id];expected=[[ids[0],ids[1]],[ids[1],ids[2]],[ids[2],ids[0]]];kind='motor';if(connections.filter(link=>ids.includes(link.a)&&ids.includes(link.b)).length!==3||!expected.every(([a,b])=>hasEdge(a,b)))return {ok:false,reason:'Wire the motor loop: battery → switch → motor → battery.'};}else return {ok:false,reason:'Add an LED/bulb plus resistor, or use a DC motor.'};if(!c.switch.userData.switchOn)return {ok:false,reason:'Loop connected. Switch is OFF — toggle it ON.'};return {ok:true,reason:kind==='motor'?'Closed loop · motor powered':'Closed loop · light powered',kind};}
 function updateCircuitStatus(text,kind){const el=$('#circuitStatus');el.className='circuit-status'+(kind?' '+kind:'');el.lastElementChild.textContent=text;}
 function refreshSimulation(){parts.forEach(p=>{if(p.userData.lightMesh)setGlow(p,false);});const c=circuitIsClosed();if(!simulationRunning){updateCircuitStatus('Simulation stopped','');return;}if(!c.ok){updateCircuitStatus(c.reason,'fault');return;}setGlow(c.lamp,true);updateCircuitStatus(c.reason,'running');}
-$('#demoCircuitBtn').addEventListener('click',()=>{if(parts.length&&!confirm('Build the demo circuit? This replaces the current bench.'))return;checkpoint();simulationRunning=false;clearScene();nextId=1;const battery=createPart('battery',new THREE.Vector3(-2.5,.65,0),{silent:true});const sw=createPart('switch',new THREE.Vector3(-.85,.65,0),{silent:true});const resistor=createPart('resistor',new THREE.Vector3(.85,.65,0),{silent:true});const lamp=createPart('bulb',new THREE.Vector3(2.5,.65,0),{silent:true});connections=[{a:battery.userData.id,b:sw.userData.id,kind:'electrical'},{a:sw.userData.id,b:resistor.userData.id,kind:'electrical'},{a:resistor.userData.id,b:lamp.userData.id,kind:'electrical'},{a:lamp.userData.id,b:battery.userData.id,kind:'electrical'}];refreshConnectionVisuals();select(sw);toggleSwitch(sw,false);updateCounts();refreshSimulation();say('Demo loop built. Tap Run, then switch ON to light the bulb.');});
+$('#demoCircuitBtn').addEventListener('click',()=>{if(parts.length&&!confirm('Build the demo circuit? This replaces the current bench.'))return;checkpoint();simulationRunning=false;clearScene();nextId=1;const battery=createPart('battery',new THREE.Vector3(-2.5,.65,0),{silent:true});const sw=createPart('switch',new THREE.Vector3(-.85,.65,0),{silent:true});const resistor=createPart('resistor',new THREE.Vector3(.85,.65,0),{silent:true});const lamp=createPart('bulb',new THREE.Vector3(2.5,.65,0),{silent:true});connections=[{a:battery.userData.id,b:sw.userData.id,kind:'electrical',aPort:0,bPort:0,color:0xe95d5d},{a:sw.userData.id,b:resistor.userData.id,kind:'electrical',aPort:1,bPort:0},{a:resistor.userData.id,b:lamp.userData.id,kind:'electrical',aPort:1,bPort:0},{a:lamp.userData.id,b:battery.userData.id,kind:'electrical',aPort:1,bPort:1}];refreshConnectionVisuals();select(sw);toggleSwitch(sw,false);updateCounts();refreshSimulation();say('Demo loop built. Tap Run, then switch ON to light the bulb.');});
 $('#runCircuitBtn').addEventListener('click',()=>{simulationRunning=true;refreshSimulation();const c=circuitIsClosed();say(c.ok?'Circuit running: lamp glowing':'Simulation started: '+c.reason);});
 $('#stopCircuitBtn').addEventListener('click',()=>{simulationRunning=false;refreshSimulation();say('Simulation stopped');});
 $('#toggleSwitchBtn').addEventListener('click',()=>{let p=selected?.userData.type==='switch'?selected:parts.find(x=>x.userData.type==='switch');if(!p)return say('Add a switch first');checkpoint();const on=toggleSwitch(p);say('Switch '+(on?'ON':'OFF'));refreshSimulation();});
