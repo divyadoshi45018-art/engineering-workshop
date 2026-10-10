@@ -20,22 +20,49 @@
     </section>
     <section class="panel">
       <div class="section-head"><h2>Parts library</h2><span>Tap to add</span></div>
-      <div class="parts-grid">
+      <div class="library-group"><h3>Basic shapes</h3><div class="parts-grid">
         <button class="part" data-part="box"><span class="part-icon">▰</span><b>Block</b></button>
         <button class="part" data-part="cylinder"><span class="part-icon">▤</span><b>Cylinder</b></button>
         <button class="part" data-part="sphere"><span class="part-icon">●</span><b>Sphere</b></button>
+        <button class="part" data-part="cone"><span class="part-icon">▲</span><b>Cone</b></button>
+        <button class="part" data-part="torus"><span class="part-icon">◉</span><b>Ring</b></button>
+      </div></div>
+      <div class="library-group"><h3>Mechanical parts</h3><div class="parts-grid">
         <button class="part" data-part="gear"><span class="part-icon">⚙</span><b>Gear</b></button>
         <button class="part" data-part="shaft"><span class="part-icon">━</span><b>Shaft</b></button>
-      </div>
+        <button class="part" data-part="wheel"><span class="part-icon">◉</span><b>Wheel</b></button>
+        <button class="part" data-part="bearing"><span class="part-icon">◎</span><b>Bearing</b></button>
+        <button class="part" data-part="washer"><span class="part-icon">⊙</span><b>Washer</b></button>
+        <button class="part" data-part="bolt"><span class="part-icon">↟</span><b>Bolt</b></button>
+        <button class="part" data-part="spring"><span class="part-icon">〰</span><b>Spring</b></button>
+        <button class="part" data-part="motor"><span class="part-icon">▣</span><b>DC motor</b></button>
+      </div></div>
+      <div class="library-group"><h3>Electronics & workshop</h3><div class="parts-grid">
+        <button class="part" data-part="battery"><span class="part-icon">▥</span><b>Battery</b></button>
+        <button class="part" data-part="led"><span class="part-icon">✦</span><b>LED</b></button>
+        <button class="part" data-part="switch"><span class="part-icon">⏻</span><b>Switch</b></button>
+        <button class="part" data-part="board"><span class="part-icon">▦</span><b>Board</b></button>
+        <button class="part" data-part="wire"><span class="part-icon">〰</span><b>Wire</b></button>
+      </div></div>
       <div class="section-head selected-head"><h2>Selected part</h2><span id="selectedName">None</span></div>
       <div class="actions">
-        <button id="undoBtn" disabled>Undo</button><button id="moveBtn">Move</button><button id="rotateBtn">Rotate 15°</button><button id="scaleBtn">Scale +</button>
-        <button id="duplicateBtn">Duplicate</button><button id="deleteBtn" class="danger">Delete</button>
+        <button id="undoBtn" disabled>Undo</button><button id="moveBtn">Drag move</button><button id="rotateBtn">Rotate Y 15°</button>
+        <button id="scaleBtn">Scale +</button><button id="scaleDownBtn">Scale −</button><button id="duplicateBtn">Duplicate</button>
+        <button id="deleteBtn" class="danger">Delete</button>
+      </div>
+      <div class="transform-panel">
+        <h3>Exact movement · step 0.25 units</h3>
+        <div class="transform-row"><b>Move X</b><button data-move="x,-0.25">−</button><button data-move="x,0.25">+</button></div>
+        <div class="transform-row"><b>Move Y · height</b><button data-move="y,-0.25">−</button><button data-move="y,0.25">+</button></div>
+        <div class="transform-row"><b>Move Z</b><button data-move="z,-0.25">−</button><button data-move="z,0.25">+</button></div>
+        <div class="transform-row"><b>Rotate X</b><button data-rotate="x,-15">−15°</button><button data-rotate="x,15">+15°</button></div>
+        <div class="transform-row"><b>Rotate Y</b><button data-rotate="y,-15">−15°</button><button data-rotate="y,15">+15°</button></div>
+        <div class="transform-row"><b>Rotate Z</b><button data-rotate="z,-15">−15°</button><button data-rotate="z,15">+15°</button></div>
       </div>
       <div class="actions secondary-actions">
         <button id="colorBtn">Change colour</button><button id="resetViewBtn">Reset view</button><button id="clearBtn" class="danger">Clear scene</button>
       </div>
-      <p class="note">Starter prototype: parts are visual models, not engineering-accurate components yet. Save stores this design in this browser on this device. Undo reverses recent edits.</p>
+      <p class="note">Workshop sandbox: parts are visual approximations, not dimensionally accurate components. Move in X/Y/Z, rotate around all axes, and save this design in this browser on this device.</p>
     </section>
   </main>
   <script type="module" src="app.js"></script>
