@@ -118,8 +118,8 @@ function makeConnectionCurve(c){
 }
 function refreshConnectionVisuals(){
  connectionVisuals.forEach(w=>{scene.remove(w);w.geometry.dispose();w.material.dispose();});connectionVisuals=[];
- connections.forEach(c=>{const curve=makeConnectionCurve(c);if(!curve)return;const color=c.kind==='electrical'?(c.color||0xf1b65d):0x6ce3c1;
-   const wire=new THREE.Mesh(new THREE.TubeGeometry(curve,32,c.kind==='electrical'?.022:.028,7,false),material(color,.35,.3,{emissive:color,emissiveIntensity:c.kind==='electrical'?.28:.13}));
+ connections.forEach(c=>{if(c.kind==='assembly'&&c.autoFitted)return;const curve=makeConnectionCurve(c);if(!curve)return;const color=c.kind==='electrical'?(c.color||0xf1b65d):0x6ce3c1;
+   const wire=new THREE.Mesh(new THREE.TubeGeometry(curve,32,c.kind==='electrical' ? .022 : .028,7,false),material(color,.35,.3,{emissive:color,emissiveIntensity:c.kind==='electrical' ? .28 : .13}));
    wire.userData.connection=true;scene.add(wire);connectionVisuals.push(wire);
  });updateCounts();
 }
@@ -151,7 +151,7 @@ function autoFitMechanical(a,b){
    const bolt=ta==='bolt'?a:b,bearing=ta==='bearing'?a:b;bearing.position.copy(bolt.position);return 'Bolt aligned with bearing bore';
  }
  if((ta==='motor'&&tb==='wheel')||(ta==='wheel'&&tb==='motor')){
-   const motor=ta==='motor'?a:b,wheel=ta==='wheel'?a:b;wheel.position.copy(motor.position).add(new THREE.Vector3(1.25,0,0));wheel.rotation.set(0,0,Math.PI/2);return 'Wheel aligned with motor shaft';
+   const motor=ta==='motor'?a:b,wheel=ta==='wheel'?a:b;wheel.position.copy(motor.position).add(new THREE.Vector3(1.25,0,0));wheel.rotation.set(0,0,0);return 'Wheel aligned with motor shaft';
  }
  return '';
 }
@@ -167,7 +167,7 @@ function connectParts(a,b){
    ap.forEach((pa,i)=>bp.forEach((pb,j)=>{const d=pa.distanceToSquared(pb);if(d<best){best=d;ai=i;bi=j;}}));
    link.aPort=ai;link.bPort=bi;link.color=(a.userData.type==='battery'&&ai===0)||(b.userData.type==='battery'&&bi===0)?0xe95d5d:0xf1b65d;
  }else{
-   const note=autoFitMechanical(a,b);if(note)say(note);
+   const note=autoFitMechanical(a,b);if(note){link.autoFitted=true;say(note);}
  }
  connections.push(link);refreshConnectionVisuals();
  if(isElectrical)say('Wire joined terminal ↔ terminal');
