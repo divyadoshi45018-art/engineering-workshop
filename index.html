@@ -11,7 +11,7 @@
   </script>
 </head>
 <body>
-  <header><div><span class="eyebrow">PERSONAL CAD PLAYGROUND</span><h1>Engineering Workshop</h1></div><button id="saveBtn" class="primary">Save</button></header>
+  <header><div><span class="eyebrow">PERSONAL CAD PLAYGROUND</span><h1>Engineering Workshop</h1></div><div class="header-actions"><button id="loadBtn">Load</button><button id="saveBtn" class="primary">Save</button></div></header>
   <main>
     <section class="viewport-wrap">
       <div id="viewport" aria-label="3D workspace"></div>
@@ -29,13 +29,13 @@
       </div>
       <div class="section-head selected-head"><h2>Selected part</h2><span id="selectedName">None</span></div>
       <div class="actions">
-        <button id="moveBtn">Move</button><button id="rotateBtn">Rotate 15°</button><button id="scaleBtn">Scale +</button>
+        <button id="undoBtn" disabled>Undo</button><button id="moveBtn">Move</button><button id="rotateBtn">Rotate 15°</button><button id="scaleBtn">Scale +</button>
         <button id="duplicateBtn">Duplicate</button><button id="deleteBtn" class="danger">Delete</button>
       </div>
       <div class="actions secondary-actions">
         <button id="colorBtn">Change colour</button><button id="resetViewBtn">Reset view</button><button id="clearBtn" class="danger">Clear scene</button>
       </div>
-      <p class="note">Starter prototype: parts are visual models, not engineering-accurate components yet. Save stores this design in this browser on this device.</p>
+      <p class="note">Starter prototype: parts are visual models, not engineering-accurate components yet. Save stores this design in this browser on this device. Undo reverses recent edits.</p>
     </section>
   </main>
   <script type="module" src="app.js"></script>
