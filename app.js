@@ -44,9 +44,9 @@ function createPart(type,position=null,opts={}){
  case'bolt':name='Threaded bolt';addMesh(g,new THREE.CylinderGeometry(.13,.13,1.1,16),metal);addMesh(g,new THREE.CylinderGeometry(.28,.28,.22,6),metal,[0,.62,0]);addThread(g,.145,.82,metal,9);break;
  case'spring':name='Spring';makeSpring(g);addMesh(g,new THREE.CylinderGeometry(.3,.3,.08,24),dark,[0,-.72,0]);addMesh(g,new THREE.CylinderGeometry(.3,.3,.08,24),dark,[0,.72,0]);break;
  case'motor':name='DC motor';addMesh(g,new THREE.CylinderGeometry(.43,.43,1.05,32),material(0x526779,.65,.3),[0,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.38,.38,.16,32),dark,[-.57,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.38,.38,.16,32),metal,[.57,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.09,.09,.72,20),metal,[.92,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.BoxGeometry(.22,.18,.2),material(0x202a36),[-.12,-.5,.12]);addMesh(g,new THREE.BoxGeometry(.22,.18,.2),material(0x202a36),[.15,-.5,.12]);break;
- case'battery':name='Battery';addMesh(g,new THREE.CylinderGeometry(.31,.31,1.12,32),material(0x2b7c63,.25,.3));addMesh(g,new THREE.CylinderGeometry(.12,.12,.09,20),metal,[0,.59,0]);addMesh(g,new THREE.TorusGeometry(.29,.025,8,32),material(0xd5dfe8),[0,.35,0]);addMesh(g,new THREE.BoxGeometry(.35,.22,.025),material(0xeaf5f0),[0,.03,.315]);addMesh(g,new THREE.BoxGeometry(.035,.14,.035),material(0xd44747),[0,.03,.34]);break;
+ case'battery':name='Battery';addMesh(g,new THREE.CylinderGeometry(.31,.31,1.12,32),material(0x2b7c63,.25,.3));addMesh(g,new THREE.CylinderGeometry(.12,.12,.09,20),metal,[0,.59,0]);addMesh(g,new THREE.CylinderGeometry(.1,.1,.07,20),material(0x293642),[0,-.59,0]);addMesh(g,new THREE.TorusGeometry(.29,.025,8,32),material(0xd5dfe8),[0,.35,0]);addMesh(g,new THREE.BoxGeometry(.35,.22,.025),material(0xeaf5f0),[0,.03,.315]);addMesh(g,new THREE.BoxGeometry(.035,.14,.035),material(0xd44747),[0,.03,.34]);break;
  case'led':name='LED';addMesh(g,new THREE.CylinderGeometry(.13,.13,.28,20),metal,[0,-.12,0]);lightMesh=addMesh(g,new THREE.SphereGeometry(.19,24,18),material(0xff4545,.1,.2,{emissive:0x000000}),[0,.1,0]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.28,10),metal,[-.07,-.32,0]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.28,10),metal,[.07,-.32,0]);break;
- case'bulb':name='Light bulb';addMesh(g,new THREE.CylinderGeometry(.15,.18,.24,24),metal,[0,-.27,0]);addMesh(g,new THREE.TorusGeometry(.145,.025,8,24),material(0x4e5b6a),[0,-.15,0]);lightMesh=addMesh(g,new THREE.SphereGeometry(.28,28,20),material(0xd9f1ff,.05,.15,{transparent:true,opacity:.72,emissive:0x000000}),[0,.13,0]);const filamentPts=[new THREE.Vector3(-.08,-.05,0),new THREE.Vector3(-.04,.03,0),new THREE.Vector3(0,-.03,0),new THREE.Vector3(.04,.03,0),new THREE.Vector3(.08,-.05,0)];addMesh(g,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(filamentPts),24,.012,6,false),metal);break;
+ case'bulb':name='Light bulb';addMesh(g,new THREE.CylinderGeometry(.15,.18,.24,24),metal,[0,-.27,0]);addMesh(g,new THREE.CylinderGeometry(.035,.035,.09,12),material(0xd4dbe2),[-.07,-.43,0]);addMesh(g,new THREE.CylinderGeometry(.035,.035,.09,12),material(0xd4dbe2),[.07,-.43,0]);addMesh(g,new THREE.TorusGeometry(.145,.025,8,24),material(0x4e5b6a),[0,-.15,0]);lightMesh=addMesh(g,new THREE.SphereGeometry(.28,28,20),material(0xd9f1ff,.05,.15,{transparent:true,opacity:.72,emissive:0x000000}),[0,.13,0]);const filamentPts=[new THREE.Vector3(-.08,-.05,0),new THREE.Vector3(-.04,.03,0),new THREE.Vector3(0,-.03,0),new THREE.Vector3(.04,.03,0),new THREE.Vector3(.08,-.05,0)];addMesh(g,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(filamentPts),24,.012,6,false),metal);break;
  case'switch':name='Switch';addMesh(g,new THREE.BoxGeometry(.85,.16,.58),dark,[0,-.1,0]);addMesh(g,new THREE.BoxGeometry(.72,.08,.45),material(0x263b4a),[0,0,0]);addMesh(g,new THREE.CylinderGeometry(.08,.08,.12,16),metal,[0,.08,0]);const lever=addMesh(g,new THREE.BoxGeometry(.12,.42,.13),material(0xe5ecf4),[0,.28,0]);lever.rotation.z=-.5;g.userData.lever=lever;g.userData.switchOn=false;addMesh(g,new THREE.CylinderGeometry(.045,.045,.12,12),material(0xd44d4d),[-.3,.04,0]);addMesh(g,new THREE.CylinderGeometry(.045,.045,.12,12),material(0x5cbe87),[.3,.04,0]);break;
  case'resistor':name='Resistor';addMesh(g,new THREE.CylinderGeometry(.13,.13,.68,24),material(0xd8b778,.15,.35),[0,0,0],[0,0,Math.PI/2]);for(let i=0;i<4;i++)addMesh(g,new THREE.CylinderGeometry(.14,.14,.045,24),material([0x9a4f2f,0x353535,0xc34b35,0xd5a83c][i]),[-.24+i*.15,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.45,10),metal,[-.55,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.45,10),metal,[.55,0,0],[0,0,Math.PI/2]);break;
  case'chip':name='IC chip';addMesh(g,new THREE.BoxGeometry(.68,.16,.68),dark);addMesh(g,new THREE.BoxGeometry(.42,.04,.42),material(0x111820),[0,.1,0]);for(let i=0;i<4;i++){const o=-.24+i*.16;addMesh(g,new THREE.BoxGeometry(.09,.035,.18),metal,[o,-.015,.4]);addMesh(g,new THREE.BoxGeometry(.09,.035,.18),metal,[o,-.015,-.4]);addMesh(g,new THREE.BoxGeometry(.18,.035,.09),metal,[.4,-.015,o]);addMesh(g,new THREE.BoxGeometry(.18,.035,.09),metal,[-.4,-.015,o]);}break;
@@ -65,7 +65,24 @@ function createPart(type,position=null,opts={}){
 function partById(id){return parts.find(p=>p.userData.id===id);}
 function walkMaterials(obj,fn){obj.traverse(o=>{if(o.isMesh&&o.material)fn(o,o.material);});}
 function setTint(p,color){p.userData.tint=color;walkMaterials(p,(m,mat)=>{if(m!==p.userData.lightMesh&&mat.color)mat.color.setHex(color);});}
-function setGlow(p,on){const lm=p.userData.lightMesh;if(!lm)return;lm.material.emissive.setHex(on?(p.userData.type==='bulb'?0xffc94f:0xff2525):0x000000);lm.material.emissiveIntensity=on?2.6:0;let light=glowingLights.get(p.userData.id);if(on&&!light){light=new THREE.PointLight(p.userData.type==='bulb'?0xffc95b:0xff4242,2.8,4);light.position.set(0,.3,0);p.add(light);glowingLights.set(p.userData.id,light);}if(light&&!on){p.remove(light);glowingLights.delete(p.userData.id);}}
+function setGlow(p,on){
+ const lm=p.userData.lightMesh;if(!lm)return;
+ const bulb=p.userData.type==='bulb',glowColor=bulb?0xffbf38:0xff2525;
+ lm.material.emissive.setHex(on?glowColor:0x000000);
+ lm.material.emissiveIntensity=on?(bulb?3.8:4.5):0;
+ if(lm.material.color)lm.material.color.setHex(on?(bulb?0xffe18a:0xff6464):(bulb?0xd9f1ff:0xff4545));
+ if(bulb)lm.material.opacity=on?.98:.72;
+ let halo=p.userData.glowHalo;
+ if(on&&!halo){
+   halo=new THREE.Mesh(new THREE.SphereGeometry(bulb?.43:.29,20,16),new THREE.MeshBasicMaterial({color:glowColor,transparent:true,opacity:bulb?.24:.18,depthWrite:false,blending:THREE.AdditiveBlending}));
+   halo.position.copy(lm.position);halo.userData.isGlowHalo=true;p.add(halo);p.userData.glowHalo=halo;
+ }
+ if(halo)halo.visible=!!on;
+ let light=glowingLights.get(p.userData.id);
+ if(on&&!light){light=new THREE.PointLight(glowColor,bulb?5:3.5,bulb?6:4);light.position.copy(lm.position);p.add(light);glowingLights.set(p.userData.id,light);}
+ if(light)light.visible=!!on;
+ if(on){lm.scale.setScalar(bulb?1.08:1.16);}else{lm.scale.setScalar(1);}
+}
 function select(p){selected=p||null;$('#selectedName').textContent=p?p.userData.name+' #'+p.userData.id:'No selection';if(p){const b=p.userData.baseSize;$('#dimX').value=Math.max(1,Math.round(b.x*p.scale.x*10));$('#dimY').value=Math.max(1,Math.round(b.y*p.scale.y*10));$('#dimZ').value=Math.max(1,Math.round(b.z*p.scale.z*10));}}
 function clearScene(){parts.forEach(p=>{scene.remove(p);walkMaterials(p,(m,mat)=>{if(m.geometry)m.geometry.dispose();if(Array.isArray(mat))mat.forEach(x=>x.dispose());else mat.dispose();});});parts=[];connections=[];connectionVisuals.forEach(w=>{scene.remove(w);w.geometry.dispose();w.material.dispose();});connectionVisuals=[];glowingLights.clear();select(null);updateCounts();updateCircuitStatus('Simulation stopped','');}
 function serialize(){return {version:2,parts:parts.map(p=>({type:p.userData.type,name:p.userData.name,id:p.userData.id,position:p.position.toArray(),rotation:p.rotation.toArray(),scale:p.scale.toArray(),tint:p.userData.tint,switchOn:!!p.userData.switchOn})),connections:connections.map(c=>({...c}))};}
@@ -73,10 +90,91 @@ function checkpoint(){history.push(JSON.stringify(serialize()));if(history.lengt
 function load(data){simulationRunning=false;clearScene();nextId=1;(data.parts||[]).forEach(d=>{const p=createPart(d.type,new THREE.Vector3(...d.position),{id:d.id,silent:true});if(!p)return;p.rotation.set(d.rotation[0],d.rotation[1],d.rotation[2]);p.scale.set(...d.scale);if(d.tint!=null)setTint(p,d.tint);if(p.userData.type==='switch'&&d.switchOn)toggleSwitch(p,true);});connections=(data.connections||[]).filter(c=>partById(c.a)&&partById(c.b));refreshConnectionVisuals();select(null);updateCounts();updateCircuitStatus('Simulation stopped','');}
 function undo(){if(!history.length)return say('Nothing to undo');const d=JSON.parse(history.pop());load(d);$('#undoBtn').disabled=history.length===0;say('Last edit undone');}
 function updateCounts(){$('#partCount').textContent=parts.length+' part'+(parts.length===1?'':'s');$('#connectionCount').textContent=connections.length+' link'+(connections.length===1?'':'s');}
-function makeConnectionCurve(a,b){const start=a.position.clone().add(new THREE.Vector3(0,.18,0)),end=b.position.clone().add(new THREE.Vector3(0,.18,0)),mid=start.clone().add(end).multiplyScalar(.5);mid.y+=.45;return new THREE.CatmullRomCurve3([start,mid,end]);}
-function refreshConnectionVisuals(){connectionVisuals.forEach(w=>{scene.remove(w);w.geometry.dispose();w.material.dispose();});connectionVisuals=[];connections.forEach(c=>{const a=partById(c.a),b=partById(c.b);if(!a||!b)return;const color=c.kind==='electrical'?0xf1b65d:0x6ce3c1;const wire=new THREE.Mesh(new THREE.TubeGeometry(makeConnectionCurve(a,b),32,.028,7,false),material(color,.35,.3,{emissive:color,emissiveIntensity:.13}));wire.userData.connection=true;scene.add(wire);connectionVisuals.push(wire);});updateCounts();}
-function connectParts(a,b){if(!a||!b||a===b)return say('Choose two different parts');if(connections.some(c=>(c.a===a.userData.id&&c.b===b.userData.id)||(c.a===b.userData.id&&c.b===a.userData.id)))return say('Those parts are already connected');checkpoint();connections.push({a:a.userData.id,b:b.userData.id,kind:electronic(a)||electronic(b)?'electrical':'assembly'});refreshConnectionVisuals();say('Joined '+a.userData.name+' ↔ '+b.userData.name);firstConnection=null;}
-function electronic(p){return ['battery','led','bulb','switch','resistor','chip','motor'].includes(p.userData.type);}
+function electricalPart(p){return !!p&&['battery','led','bulb','switch','resistor','chip','motor'].includes(p.userData.type);}
+function localPorts(p){
+ const t=p.userData.type;
+ if(t==='battery')return [new THREE.Vector3(0,.64,0),new THREE.Vector3(0,-.61,0)];
+ if(t==='switch')return [new THREE.Vector3(-.34,.08,0),new THREE.Vector3(.34,.08,0)];
+ if(t==='resistor')return [new THREE.Vector3(-.78,0,0),new THREE.Vector3(.78,0,0)];
+ if(t==='led')return [new THREE.Vector3(-.07,-.46,0),new THREE.Vector3(.07,-.46,0)];
+ if(t==='bulb')return [new THREE.Vector3(-.07,-.43,0),new THREE.Vector3(.07,-.43,0)];
+ if(t==='chip')return [new THREE.Vector3(-.4,0,0),new THREE.Vector3(.4,0,0)];
+ if(t==='motor')return [new THREE.Vector3(-.16,-.58,.12),new THREE.Vector3(.17,-.58,.12)];
+ return [new THREE.Vector3(0,0,0)];
+}
+function worldPorts(p){return localPorts(p).map(v=>p.localToWorld(v.clone()));}
+function makeConnectionCurve(c){
+ const a=partById(c.a),b=partById(c.b);if(!a||!b)return null;
+ let start,end;
+ if(c.kind==='electrical'){
+   const ap=worldPorts(a),bp=worldPorts(b);
+   start=ap[Math.max(0,Math.min(c.aPort||0,ap.length-1))];
+   end=bp[Math.max(0,Math.min(c.bPort||0,bp.length-1))];
+ }else{
+   start=a.position.clone().add(new THREE.Vector3(0,.12,0));end=b.position.clone().add(new THREE.Vector3(0,.12,0));
+ }
+ const mid=start.clone().add(end).multiplyScalar(.5);mid.y+=Math.min(.9,Math.max(.18,start.distanceTo(end)*.18));
+ return new THREE.CatmullRomCurve3([start,mid,end]);
+}
+function refreshConnectionVisuals(){
+ connectionVisuals.forEach(w=>{scene.remove(w);w.geometry.dispose();w.material.dispose();});connectionVisuals=[];
+ connections.forEach(c=>{const curve=makeConnectionCurve(c);if(!curve)return;const color=c.kind==='electrical'?(c.color||0xf1b65d):0x6ce3c1;
+   const wire=new THREE.Mesh(new THREE.TubeGeometry(curve,32,c.kind==='electrical'?.022:.028,7,false),material(color,.35,.3,{emissive:color,emissiveIntensity:c.kind==='electrical'?.28:.13}));
+   wire.userData.connection=true;scene.add(wire);connectionVisuals.push(wire);
+ });updateCounts();
+}
+function autoFitMechanical(a,b){
+ const ta=a.userData.type,tb=b.userData.type;
+ const shaftTarget=(ta==='shaft'&&['wheel','bearing','gear','washer','torus','motor'].includes(tb))?{shaft:a,target:b}:
+                  (tb==='shaft'&&['wheel','bearing','gear','washer','torus','motor'].includes(ta))?{shaft:b,target:a}:null;
+ if(shaftTarget){
+   const {shaft,target}=shaftTarget,tt=target.userData.type;
+   if(tt==='motor'){shaft.rotation.set(0,0,Math.PI/2);shaft.position.copy(target.localToWorld(new THREE.Vector3(1.24,0,0)));}
+   else if(tt==='wheel'){shaft.rotation.set(0,0,Math.PI/2);shaft.position.copy(target.position);}
+   else if(tt==='bearing'){shaft.rotation.set(0,0,0);shaft.position.copy(target.position);}
+   else {shaft.rotation.set(0,0,0);shaft.position.copy(target.position);}
+   return 'Shaft aligned with '+target.userData.name.toLowerCase();
+ }
+ if((ta==='bearing'&&tb==='wheel')||(ta==='wheel'&&tb==='bearing')){
+   const bearing=ta==='bearing'?a:b,wheel=ta==='wheel'?a:b;
+   bearing.rotation.set(wheel.rotation.x,0,wheel.rotation.z+Math.PI/2);bearing.position.copy(wheel.position);
+   return 'Bearing seated in wheel';
+ }
+ if(ta==='gear'&&tb==='gear'){
+   b.position.copy(a.position).add(new THREE.Vector3(1.58,0,0));b.position.y=a.position.y;b.rotation.y=a.rotation.y;
+   return 'Gears positioned for meshing';
+ }
+ if((ta==='bolt'&&tb==='washer')||(ta==='washer'&&tb==='bolt')){
+   const bolt=ta==='bolt'?a:b,washer=ta==='washer'?a:b;washer.position.copy(bolt.position).add(new THREE.Vector3(0,-.52,0));return 'Washer placed under bolt head';
+ }
+ if((ta==='bolt'&&tb==='bearing')||(ta==='bearing'&&tb==='bolt')){
+   const bolt=ta==='bolt'?a:b,bearing=ta==='bearing'?a:b;bearing.position.copy(bolt.position);return 'Bolt aligned with bearing bore';
+ }
+ if((ta==='motor'&&tb==='wheel')||(ta==='wheel'&&tb==='motor')){
+   const motor=ta==='motor'?a:b,wheel=ta==='wheel'?a:b;wheel.position.copy(motor.position).add(new THREE.Vector3(1.25,0,0));wheel.rotation.set(0,0,Math.PI/2);return 'Wheel aligned with motor shaft';
+ }
+ return '';
+}
+function electrical(p){return ['battery','led','bulb','switch','resistor','chip','motor'].includes(p.userData.type);}
+function connectParts(a,b){
+ if(!a||!b||a===b)return say('Choose two different parts');
+ if(connections.some(c=>(c.a===a.userData.id&&c.b===b.userData.id)||(c.a===b.userData.id&&c.b===a.userData.id)))return say('Those parts are already connected');
+ checkpoint();
+ const isElectrical=electrical(a)&&electrical(b);
+ let link={a:a.userData.id,b:b.userData.id,kind:isElectrical?'electrical':'assembly'};
+ if(isElectrical){
+   const ap=worldPorts(a),bp=worldPorts(b);let best=Infinity,ai=0,bi=0;
+   ap.forEach((pa,i)=>bp.forEach((pb,j)=>{const d=pa.distanceToSquared(pb);if(d<best){best=d;ai=i;bi=j;}}));
+   link.aPort=ai;link.bPort=bi;link.color=(a.userData.type==='battery'&&ai===0)||(b.userData.type==='battery'&&bi===0)?0xe95d5d:0xf1b65d;
+ }else{
+   const note=autoFitMechanical(a,b);if(note)say(note);
+ }
+ connections.push(link);refreshConnectionVisuals();
+ if(isElectrical)say('Wire joined terminal ↔ terminal');
+ else if(!['gear','bearing','wheel','bolt','washer','motor','shaft'].includes(a.userData.type)&&!['gear','bearing','wheel','bolt','washer','motor','shaft'].includes(b.userData.type))say('Assembly link added');
+ firstConnection=null;
+}
+function electronic(p){return electrical(p);}
 function add(type){checkpoint();const p=createPart(type);updateCounts();return p;}
 document.querySelectorAll('[data-part]').forEach(b=>b.addEventListener('click',()=>add(b.dataset.part)));
 $('#undoBtn').addEventListener('click',undo);
