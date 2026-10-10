@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#10151f">
+  <title>Engineering Workshop</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+  </script>
+</head>
+<body>
+  <header><div><span class="eyebrow">PERSONAL CAD PLAYGROUND</span><h1>Engineering Workshop</h1></div><button id="saveBtn" class="primary">Save</button></header>
+  <main>
+    <section class="viewport-wrap">
+      <div id="viewport" aria-label="3D workspace"></div>
+      <div class="view-hint">Drag to orbit · Pinch/scroll to zoom · Tap a part to select</div>
+      <div id="status" role="status">Ready to build</div>
+    </section>
+    <section class="panel">
+      <div class="section-head"><h2>Parts library</h2><span>Tap to add</span></div>
+      <div class="parts-grid">
+        <button class="part" data-part="box"><span class="part-icon">▰</span><b>Block</b></button>
+        <button class="part" data-part="cylinder"><span class="part-icon">▤</span><b>Cylinder</b></button>
+        <button class="part" data-part="sphere"><span class="part-icon">●</span><b>Sphere</b></button>
+        <button class="part" data-part="gear"><span class="part-icon">⚙</span><b>Gear</b></button>
+        <button class="part" data-part="shaft"><span class="part-icon">━</span><b>Shaft</b></button>
+      </div>
+      <div class="section-head selected-head"><h2>Selected part</h2><span id="selectedName">None</span></div>
+      <div class="actions">
+        <button id="moveBtn">Move</button><button id="rotateBtn">Rotate 15°</button><button id="scaleBtn">Scale +</button>
+        <button id="duplicateBtn">Duplicate</button><button id="deleteBtn" class="danger">Delete</button>
+      </div>
+      <div class="actions secondary-actions">
+        <button id="colorBtn">Change colour</button><button id="resetViewBtn">Reset view</button><button id="clearBtn" class="danger">Clear scene</button>
+      </div>
+      <p class="note">Starter prototype: parts are visual models, not engineering-accurate components yet. Save stores this design in this browser on this device.</p>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
