@@ -25,3 +25,13 @@ This is a learning prototype, not a manufacturing-grade CAD system or a validate
 
 ## Development
 The page loads Three.js and OrbitControls from jsDelivr CDN, so the first load requires internet access. It is a static GitHub Pages site; no build step is required.
+
+
+## Recent working-sandbox improvements
+
+- The light demo now has a stronger emissive bulb/LED material, a visible halo, and a local point light when the simulation passes.
+- Electrical wires use each part's terminal positions instead of connecting the centers of component bodies. The connection logic prefers unused terminals.
+- A compatible mechanical connection can auto-align a shaft with a wheel, bearing, gear, pulley or motor; a bearing can seat into a wheel; two gears are positioned for meshing; and a nut/washer can be placed on a bolt.
+- Added nut, pulley, L-bracket and hinge parts.
+- A simple DC motor loop can run as battery → switch → motor → battery; the motor shaft animates while the loop is closed and the switch is ON.
+- The demo bulb loop remains a simplified teaching model. It does not calculate real current, voltage drop, LED polarity, torque, gear teeth contact, collisions, or manufacturing tolerances. Always build real circuits separately and safely.
