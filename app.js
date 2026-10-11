@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const $ = s => document.querySelector(s);
 // Standard-sized component library. Dimensions are nominal illustrative mm; verify datasheets for fabrication.
@@ -13,6 +14,54 @@ const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; renderer.outputColorSpace=THREE.SRGBColorSpace;
 viewport.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera,renderer.domElement); controls.enableDamping=true; controls.target.set(0,.6,0);
+const clock=new THREE.Clock();
+let viewMode='orbit', roomModel=null;
+const walkKeys=new Set();
+const walkState={yaw:0,pitch:0,dragging:false,lastX:0,lastY:0};
+const roomLoader=new GLTFLoader();
+function setViewMode(mode){
+ viewMode=mode==='walk'?'walk':'orbit';
+ controls.enabled=viewMode==='orbit';
+ $('#orbitViewBtn').classList.toggle('active',viewMode==='orbit');
+ $('#walkViewBtn').classList.toggle('active',viewMode==='walk');
+ $('#walkPad').hidden=viewMode!=='walk';
+ $('#viewHintText').textContent=viewMode==='walk'?'Walk: WASD / arrow keys · drag to look · tap Move pad on phone':'Orbit: drag to rotate · pinch to zoom · tap a part to select';
+ if(viewMode==='walk'){
+  const direction=new THREE.Vector3();camera.getWorldDirection(direction);
+  walkState.yaw=Math.atan2(direction.x,direction.z);
+  walkState.pitch=Math.asin(THREE.MathUtils.clamp(direction.y,-1,1));
+  camera.rotation.order='YXZ';camera.rotation.y=walkState.yaw;camera.rotation.x=walkState.pitch;
+  say('First-person mode · use WASD or the on-screen pad');
+ }else{controls.update();say('Orbit/CAD mode');}
+}
+function updateWalkLook(dx,dy){
+ walkState.yaw-=dx*.004;
+ walkState.pitch=THREE.MathUtils.clamp(walkState.pitch-dy*.004,-1.25,1.25);
+ camera.rotation.order='YXZ';camera.rotation.y=walkState.yaw;camera.rotation.x=walkState.pitch;
+}
+function moveWalker(dt){
+ if(viewMode!=='walk')return;
+ const forward=(walkKeys.has('w')||walkKeys.has('arrowup')?1:0)-(walkKeys.has('s')||walkKeys.has('arrowdown')?1:0);
+ const side=(walkKeys.has('d')||walkKeys.has('arrowright')?1:0)-(walkKeys.has('a')||walkKeys.has('arrowleft')?1:0);
+ if(!forward&&!side)return;
+ const speed=3.2*dt, fwd=new THREE.Vector3(Math.sin(walkState.yaw),0,Math.cos(walkState.yaw)), right=new THREE.Vector3(fwd.z,0,-fwd.x);
+ camera.position.addScaledVector(fwd,-forward*speed);camera.position.addScaledVector(right,side*speed);
+ camera.position.y=Math.max(.25,Math.min(2.2,camera.position.y));
+}
+function importRoomModel(file){
+ if(!file)return;
+ const url=URL.createObjectURL(file);
+ roomLoader.load(url,gltf=>{
+  if(roomModel)scene.remove(roomModel);
+  roomModel=gltf.scene;roomModel.name='Imported room scan';
+  roomModel.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material)o.material.side=THREE.DoubleSide;}});
+  const box=new THREE.Box3().setFromObject(roomModel),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+  roomModel.position.sub(center);roomModel.position.y-=box.min.y;scene.add(roomModel);URL.revokeObjectURL(url);
+  $('#roomInfo').textContent='Room model loaded · '+size.x.toFixed(2)+' × '+size.y.toFixed(2)+' × '+size.z.toFixed(2)+' scene units';
+  say('Room model imported. Use Orbit to inspect or First person to explore.');
+ },undefined,error=>{URL.revokeObjectURL(url);console.error(error);say('Could not load this model. Try a valid .glb or .gltf file.');});
+}
+
 scene.add(new THREE.HemisphereLight(0xdbeaff,0x263142,2.1));
 const keyLight=new THREE.DirectionalLight(0xffffff,2.3);keyLight.position.set(5,9,6);keyLight.castShadow=true;scene.add(keyLight);
 const fillLight=new THREE.DirectionalLight(0x8cbcff,.65);fillLight.position.set(-6,4,-4);scene.add(fillLight);
@@ -304,9 +353,20 @@ $('#deleteBtn').addEventListener('click',()=>{if(!selected)return say('Select a 
 $('#colorBtn').addEventListener('click',()=>{if(!selected)return say('Select a part first');checkpoint();colorIndex=(colorIndex+1)%colors.length;setTint(selected,colors[colorIndex]);say('Main component colour changed');});
 $('#connectModeBtn').addEventListener('click',()=>{connectMode=!connectMode;moveMode=false;controls.enabled=true;firstConnection=null;$('#moveBtn').textContent='✥ Drag move';$('#connectModeBtn').textContent=connectMode?'＋ Connect parts: ON':'＋ Connect parts: OFF';say(connectMode?'Tap one component, then another to connect them':'Connection mode off');});
 $('#disconnectBtn').addEventListener('click',()=>{if(!connections.length)return say('No connections to remove');checkpoint();connections.pop();refreshConnectionVisuals();say('Last connection removed');updateCircuitStatus('Simulation stopped','');});
-$('#resetViewBtn').addEventListener('click',()=>{camera.position.set(7,6,9);controls.target.set(0,.6,0);controls.update();say('Camera view reset');});
+$('#resetViewBtn').addEventListener('click',()=>{camera.position.set(7,6,9);controls.target.set(0,.6,0);camera.rotation.set(0,0,0);setViewMode('orbit');controls.update();say('Camera view reset');});
 $('#gridBtn').addEventListener('click',()=>{gridOn=!gridOn;grid.visible=gridOn;$('#gridBtn').textContent='Grid: '+(gridOn?'ON':'OFF');});
 $('#fullscreenBtn').addEventListener('click',()=>{viewportWrap.classList.toggle('fullscreen-mode');$('#fullscreenBtn').textContent=viewportWrap.classList.contains('fullscreen-mode')?'⤢':'⛶';setTimeout(resize,40);});
+$('#orbitViewBtn').addEventListener('click',()=>setViewMode('orbit'));
+$('#walkViewBtn').addEventListener('click',()=>setViewMode('walk'));
+$('#roomModelInput').addEventListener('change',e=>{importRoomModel(e.target.files&&e.target.files[0]);e.target.value='';});
+window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)&&viewMode==='walk'){walkKeys.add(k);e.preventDefault();}});
+window.addEventListener('keyup',e=>walkKeys.delete(e.key.toLowerCase()));
+window.addEventListener('blur',()=>walkKeys.clear());
+renderer.domElement.addEventListener('pointerdown',e=>{if(viewMode!=='walk'||e.pointerType==='mouse')return;walkState.dragging=true;walkState.lastX=e.clientX;walkState.lastY=e.clientY;});
+renderer.domElement.addEventListener('pointermove',e=>{if(viewMode!=='walk'||!walkState.dragging)return;updateWalkLook(e.clientX-walkState.lastX,e.clientY-walkState.lastY);walkState.lastX=e.clientX;walkState.lastY=e.clientY;});
+window.addEventListener('pointerup',()=>walkState.dragging=false);
+$('#walkPad').querySelectorAll('[data-walk]').forEach(btn=>{const key=btn.dataset.walk;const start=e=>{e.preventDefault();walkKeys.add(key);};const stop=e=>{e.preventDefault();walkKeys.delete(key);};btn.addEventListener('pointerdown',start);btn.addEventListener('pointerup',stop);btn.addEventListener('pointercancel',stop);btn.addEventListener('pointerleave',stop);});
+
 $('#clearBtn').addEventListener('click',()=>{if(!parts.length)return say('Bench is already empty');if(!confirm('Clear every part and connection from the bench?'))return;checkpoint();clearScene();updateCounts();say('Bench cleared');});
 function setPointer(e){const r=renderer.domElement.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);}
 const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3();
@@ -371,4 +431,4 @@ if(!initialLoaded){createPart('board',new THREE.Vector3(0,.12,0));createPart('ge
 updateCounts();select(null);
 function resize(){const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(viewport);
-function animate(){requestAnimationFrame(animate);controls.update();if(simulationRunning){const c=getCircuitParts();const result=circuitIsClosed();if(result.ok&&c.lamp){/* point light is parented to the lamp and follows it */}const motor=parts.find(p=>mechanicalKind(p)==='motor');if(motor&&result.ok&&result.kind==='motor'){if(motor.userData.motorShaft)motor.userData.motorShaft.rotateY(.14);connections.filter(c=>c.kind==='assembly'&&(c.a===motor.userData.id||c.b===motor.userData.id)).forEach(c=>{const other=partById(c.a===motor.userData.id?c.b:c.a);if(other&&mechanicalKind(other)==='wheel')other.rotateX(.08);});}}renderer.render(scene,camera);}resize();animate();
+function animate(){requestAnimationFrame(animate);if(viewMode==='orbit')controls.update();else moveWalker(Math.min(clock.getDelta(),.05));if(simulationRunning){const c=getCircuitParts();const result=circuitIsClosed();if(result.ok&&c.lamp){/* point light is parented to the lamp and follows it */}const motor=parts.find(p=>mechanicalKind(p)==='motor');if(motor&&result.ok&&result.kind==='motor'){if(motor.userData.motorShaft)motor.userData.motorShaft.rotateY(.14);connections.filter(c=>c.kind==='assembly'&&(c.a===motor.userData.id||c.b===motor.userData.id)).forEach(c=>{const other=partById(c.a===motor.userData.id?c.b:c.a);if(other&&mechanicalKind(other)==='wheel')other.rotateX(.08);});}}renderer.render(scene,camera);}resize();animate();
