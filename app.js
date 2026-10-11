@@ -373,7 +373,7 @@ function importPrintablePart(file){
    let box=new THREE.Box3().setFromObject(group);
    if(box.isEmpty())throw new Error('Model has no visible geometry');
    const center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
-   group.position.sub(center);
+   model.position.sub(center);
    const largest=Math.max(size.x,size.y,size.z)||1;
    group.scale.setScalar(2.2/largest);
    group.position.set((parts.length%4-1.5)*1.7,.8,Math.floor(parts.length/4)*1.55);
