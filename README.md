@@ -35,3 +35,10 @@ The page loads Three.js and OrbitControls from jsDelivr CDN, so the first load r
 - Added nut, pulley, L-bracket and hinge parts.
 - A simple DC motor loop can run as battery → switch → motor → battery; the motor shaft animates while the loop is closed and the switch is ON.
 - The demo bulb loop remains a simplified teaching model. It does not calculate real current, voltage drop, LED polarity, torque, gear teeth contact, collisions, or manufacturing tolerances. Always build real circuits separately and safely.
+
+
+## Smart sketch and mechanical catalogue upgrade
+
+- Smart outline correction recognizes closed hand-drawn circles/ellipses and rectangles before extrusion; irregular outlines remain freeform. This is deterministic geometric recognition, not a cloud AI service.
+- Searchable category folders provide 30 nominally dimensioned fasteners, shafts/bearings, gears/drives, wheels/motion parts, structural hardware/springs, and motors/mechanisms.
+- The catalogue shows length × height × width in mm and creates procedural 3D visual approximations. These are not manufacturer CAD files; validate exact standards and dimensions against supplier datasheets before making parts.
