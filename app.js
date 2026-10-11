@@ -169,7 +169,7 @@ function autoFitMechanical(a,b){
  const shaftTarget=(ta==='shaft'&&['wheel','bearing','gear','washer','torus','pulley','motor'].includes(tb))?{shaft:a,target:b}:
                   (tb==='shaft'&&['wheel','bearing','gear','washer','torus','pulley','motor'].includes(ta))?{shaft:b,target:a}:null;
  if(shaftTarget){
-   const {shaft,target}=shaftTarget,tt=target.userData.type;
+   const {shaft,target}=shaftTarget,tt=mechanicalKind(target);
    if(tt==='motor'){shaft.rotation.set(0,0,Math.PI/2);shaft.position.copy(target.localToWorld(new THREE.Vector3(1.24,0,0)));}
    else if(tt==='wheel'||tt==='pulley'){shaft.rotation.set(0,0,Math.PI/2);shaft.position.copy(target.position);}
    else if(tt==='bearing'){shaft.rotation.set(0,0,0);shaft.position.copy(target.position);}
@@ -257,7 +257,7 @@ function correctedOutline(input){
  const variance=radial.reduce((a,b)=>a+(b-mean)**2,0)/radial.length;
  const cv=Math.sqrt(variance)/Math.max(mean,.001);
  const aspect=w/Math.max(h,.001);
- if(closed&&pts.length>=12&&cv<.27&&aspect>.58&&aspect<1.72){
+ if(closed&&pts.length>=12&&cv<.24&&Math.abs(mean-1)<.12&&aspect>.58&&aspect<1.72){
    const circle=[];
    for(let i=0;i<72;i++){const a=i/72*Math.PI*2;circle.push({x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry});}
    return {points:circle,shape:Math.abs(w-h)/Math.max(w,h)<.16?'circle':'ellipse'};
@@ -279,7 +279,7 @@ function correctedOutline(input){
    if(max>tol){const left=simplify(arr.slice(0,idx+1),tol),right=simplify(arr.slice(idx),tol);return left.slice(0,-1).concat(right);}
    return [a,b];
  }
- let corners=simplify(path,.035);
+ let corners=simplify(closed?path.concat([path[0]]):path,.035);
  if(corners.length>1&&Math.hypot(corners[0].x-corners[corners.length-1].x,corners[0].y-corners[corners.length-1].y)<.08)corners=corners.slice(0,-1);
  if(closed&&corners.length===3)return {points:corners,shape:'triangle'};
  if(closed&&corners.length===4){
@@ -316,7 +316,7 @@ renderer.domElement.addEventListener('pointerdown',e=>{setPointer(e);const hits=
  select(p);if(moveMode){checkpoint();if(raycaster.ray.intersectPlane(plane,hit))drag={id:e.pointerId,obj:p,offset:p.position.clone().sub(hit)};renderer.domElement.setPointerCapture(e.pointerId);}
 });
 renderer.domElement.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;setPointer(e);if(raycaster.ray.intersectPlane(plane,hit)){drag.obj.position.x=hit.x+drag.offset.x;drag.obj.position.z=hit.z+drag.offset.z;refreshConnectionVisuals();}});
-function endDrag(e){if(drag&&drag.id===e.pointerId){const moved=drag.obj;drag=null;const candidate=parts.filter(p=>p!==moved&&canAutoFitMechanical(moved,p)).map(p=>({p,d:p.position.distanceTo(moved.position)})).filter(x=>x.d<1.35).sort((a,b)=>a.d-b.d)[0]?.p;if(moved.userData.type==='wire'){autoSnapWire(moved);if(simulationRunning)refreshSimulation();}else if(candidate){const linked=connections.some(c=>(c.a===moved.userData.id&&c.b===candidate.userData.id)||(c.a===candidate.userData.id&&c.b===moved.userData.id));if(linked){const note=autoFitMechanical(moved,candidate);refreshConnectionVisuals();say(note||'Part snapped into place');}else connectParts(moved,candidate);}else say('Part moved');}}renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);
+function endDrag(e){if(drag&&drag.id===e.pointerId){const moved=drag.obj;drag=null;const movedSize=moved.userData.baseSize.clone().multiply(moved.scale),candidate=parts.filter(p=>p!==moved&&canAutoFitMechanical(moved,p)).map(p=>{const size=p.userData.baseSize.clone().multiply(p.scale);return {p,d:p.position.distanceTo(moved.position),limit:Math.min(4.5,Math.max(1.35,(Math.max(movedSize.x,movedSize.y,movedSize.z)+Math.max(size.x,size.y,size.z))*.28))};}).filter(x=>x.d<x.limit).sort((a,b)=>a.d-b.d)[0]?.p;if(moved.userData.type==='wire'){autoSnapWire(moved);if(simulationRunning)refreshSimulation();}else if(candidate){const linked=connections.some(c=>(c.a===moved.userData.id&&c.b===candidate.userData.id)||(c.a===candidate.userData.id&&c.b===moved.userData.id));if(linked){const note=autoFitMechanical(moved,candidate);refreshConnectionVisuals();say(note||'Part snapped into place');}else connectParts(moved,candidate);}else say('Part moved');}}renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);
 function toggleSwitch(p,on=null){if(!p||p.userData.type!=='switch')return false;p.userData.switchOn=on==null?!p.userData.switchOn:!!on;const lever=p.userData.lever;if(lever){lever.rotation.z=p.userData.switchOn ? 0.5 : -0.5;lever.material.color.setHex(p.userData.switchOn?0x6ce3c1:0xe5ecf4);}return p.userData.switchOn;}
 function getCircuitParts(){return {battery:parts.find(p=>p.userData.type==='battery'),switch:parts.find(p=>p.userData.type==='switch'),resistor:parts.find(p=>p.userData.type==='resistor'),lamp:parts.find(p=>['led','bulb'].includes(p.userData.type)),motor:parts.find(p=>p.userData.type==='motor')};}
 function circuitIsClosed(){
@@ -371,4 +371,4 @@ if(!initialLoaded){createPart('board',new THREE.Vector3(0,.12,0));createPart('ge
 updateCounts();select(null);
 function resize(){const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
 window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(viewport);
-function animate(){requestAnimationFrame(animate);controls.update();if(simulationRunning){const c=getCircuitParts();const result=circuitIsClosed();if(result.ok&&c.lamp){/* point light is parented to the lamp and follows it */}const motor=parts.find(p=>p.userData.type==='motor');if(motor&&result.ok&&result.kind==='motor'){if(motor.userData.motorShaft)motor.userData.motorShaft.rotateY(.14);connections.filter(c=>c.kind==='assembly'&&(c.a===motor.userData.id||c.b===motor.userData.id)).forEach(c=>{const other=partById(c.a===motor.userData.id?c.b:c.a);if(other&&other.userData.type==='wheel')other.rotateX(.08);});}}renderer.render(scene,camera);}resize();animate();
+function animate(){requestAnimationFrame(animate);controls.update();if(simulationRunning){const c=getCircuitParts();const result=circuitIsClosed();if(result.ok&&c.lamp){/* point light is parented to the lamp and follows it */}const motor=parts.find(p=>mechanicalKind(p)==='motor');if(motor&&result.ok&&result.kind==='motor'){if(motor.userData.motorShaft)motor.userData.motorShaft.rotateY(.14);connections.filter(c=>c.kind==='assembly'&&(c.a===motor.userData.id||c.b===motor.userData.id)).forEach(c=>{const other=partById(c.a===motor.userData.id?c.b:c.a);if(other&&mechanicalKind(other)==='wheel')other.rotateX(.08);});}}renderer.render(scene,camera);}resize();animate();
