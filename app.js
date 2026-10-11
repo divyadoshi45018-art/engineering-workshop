@@ -146,8 +146,26 @@ function refreshConnectionVisuals(){
    wire.userData.connection=true;scene.add(wire);connectionVisuals.push(wire);
  });updateCounts();
 }
+function mechanicalKind(p){
+ const type=String(p?.userData?.type||'').toLowerCase();
+ const name=String(p?.userData?.name||'').toLowerCase();
+ if(['shaft','wheel','bearing','gear','washer','nut','bolt','pulley','motor','bracket','hinge','spring'].includes(type))return type;
+ if(/\b(nut|nyloc|wing nut)\b/.test(name))return 'nut';
+ if(/\b(bolt|screw|u-bolt|eye bolt|hook bolt|threaded rod)\b/.test(name))return 'bolt';
+ if(/washer/.test(name))return 'washer';
+ if(/bearing|bushing|bush/.test(name))return 'bearing';
+ if(/\b(shaft|axle|rod|lead screw|ball screw|spindle)\b/.test(name))return 'shaft';
+ if(/gear|sprocket|rack gear|worm wheel|pinion/.test(name))return 'gear';
+ if(/wheel|caster|flywheel|handwheel|omni|mecanum/.test(name))return 'wheel';
+ if(/pulley/.test(name))return 'pulley';
+ if(/motor|servo|stepper|actuator|gearbox/.test(name))return 'motor';
+ if(/hinge/.test(name))return 'hinge';
+ if(/spring/.test(name))return 'spring';
+ if(/bracket|mount|brace|clamp|joining plate|extrusion/.test(name))return 'bracket';
+ return type;
+}
 function autoFitMechanical(a,b){
- const ta=a.userData.type,tb=b.userData.type;
+ const ta=mechanicalKind(a),tb=mechanicalKind(b);
  const shaftTarget=(ta==='shaft'&&['wheel','bearing','gear','washer','torus','pulley','motor'].includes(tb))?{shaft:a,target:b}:
                   (tb==='shaft'&&['wheel','bearing','gear','washer','torus','pulley','motor'].includes(ta))?{shaft:b,target:a}:null;
  if(shaftTarget){
@@ -183,7 +201,7 @@ function autoFitMechanical(a,b){
 }
 function electrical(p){return ['battery','led','bulb','switch','resistor','chip','motor','wire','capacitor','diode','buzzer','photoresistor'].includes(p.userData.type);}
 function canAutoFitMechanical(a,b){
- const x=a.userData.type,y=b.userData.type;
+ const x=mechanicalKind(a),y=mechanicalKind(b);
  const pair=(a1,b1)=>x===a1&&y===b1||x===b1&&y===a1;
  return pair('shaft','wheel')||pair('shaft','bearing')||pair('shaft','gear')||pair('shaft','washer')||pair('shaft','torus')||pair('shaft','pulley')||pair('shaft','motor')||pair('bearing','wheel')||pair('gear','gear')||pair('bolt','nut')||pair('bolt','washer')||pair('bolt','bearing')||pair('motor','wheel')||(!(electrical(a)&&electrical(b))||x==='wire'||y==='wire');
 }
@@ -224,7 +242,54 @@ sketch.addEventListener('pointerdown',e=>{sketching=true;sketch.setPointerCaptur
 sketch.addEventListener('pointermove',e=>{if(!sketching)return;const p=sketchPoint(e),last=sketchPoints[sketchPoints.length-1];if(Math.hypot((p.x-last.x)*sketch.width,(p.y-last.y)*sketch.height)>4){sketchPoints.push(p);paintSketch();}});
 function stopSketch(){sketching=false;}sketch.addEventListener('pointerup',stopSketch);sketch.addEventListener('pointercancel',stopSketch);
 $('#clearSketchBtn').addEventListener('click',()=>{sketchPoints=[];paintSketch();say('Sketch cleared');});
-function correctedOutline(input){const pts=input.map(p=>({...p}));if(pts.length<3)return {points:pts,shape:'freeform'};const first=pts[0],last=pts[pts.length-1],xs=pts.map(p=>p.x),ys=pts.map(p=>p.y),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),w=maxX-minX,h=maxY-minY,closed=Math.hypot((first.x-last.x)*sketch.width,(first.y-last.y)*sketch.height)<Math.max(22,Math.min(sketch.width,sketch.height)*.13);if(!closed||w<.035||h<.035)return {points:pts,shape:'freeform'};const cx=pts.reduce((s,p)=>s+p.x,0)/pts.length,cy=pts.reduce((s,p)=>s+p.y,0)/pts.length;const rx=w/2,ry=h/2;const rr=pts.map(p=>Math.hypot((p.x-cx)/Math.max(rx,.001),(p.y-cy)/Math.max(ry,.001)));const mean=rr.reduce((a,b)=>a+b,0)/rr.length,variance=rr.reduce((a,b)=>a+(b-mean)**2,0)/rr.length,cv=Math.sqrt(variance)/Math.max(mean,.001);if(cv<.22&&w/h>.62&&w/h<1.6){const circle=[];for(let i=0;i<64;i++){const a=i/64*Math.PI*2;circle.push({x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry});}return {points:circle,shape:Math.abs(w-h)/Math.max(w,h)<.14?'circle':'ellipse'};}const near=(v,a,b)=>Math.abs(v-a)<.055;const edges={l:pts.some(p=>near(p.x,minX,maxX)&&Math.abs(p.x-minX)<.045),r:pts.some(p=>Math.abs(p.x-maxX)<.045),t:pts.some(p=>Math.abs(p.y-minY)<.045),b:pts.some(p=>Math.abs(p.y-maxY)<.045)};if(Object.values(edges).every(Boolean)){return {points:[{x:minX,y:minY},{x:maxX,y:minY},{x:maxX,y:maxY},{x:minX,y:maxY}],shape:'rectangle'};}const path=pts.slice();if(path.length>2&&Math.hypot(path[0].x-path[path.length-1].x,path[0].y-path[path.length-1].y)<.06)path.pop();const simplify=(arr,tol)=>{if(arr.length<3)return arr;const a=arr[0],b=arr[arr.length-1],dx=b.x-a.x,dy=b.y-a.y,den=dx*dx+dy*dy;let max=0,idx=0;for(let i=1;i<arr.length-1;i++){const p=arr[i],u=den?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/den)):0,d=Math.hypot(p.x-(a.x+u*dx),p.y-(a.y+u*dy));if(d>max){max=d;idx=i;}}if(max>tol){const left=simplify(arr.slice(0,idx+1),tol),right=simplify(arr.slice(idx),tol);return left.slice(0,-1).concat(right);}return [a,b];};let corners=simplify(path,.035);if(corners.length===3)return {points:corners,shape:'triangle'};return {points:pts,shape:'freeform'};}
+function correctedOutline(input){
+ const pts=input.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>({x:Math.max(0,Math.min(1,p.x)),y:Math.max(0,Math.min(1,p.y))}));
+ if(pts.length<3)return {points:pts,shape:'freeform'};
+ const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),w=maxX-minX,h=maxY-minY;
+ if(w<.025||h<.025)return {points:pts,shape:'freeform'};
+ const distPx=(a,b)=>Math.hypot((a.x-b.x)*sketch.width,(a.y-b.y)*sketch.height);
+ const closeThreshold=Math.max(18,Math.min(sketch.width,sketch.height)*.12);
+ const closed=distPx(pts[0],pts[pts.length-1])<closeThreshold;
+ // Use the bounding-box centre, not the average stroke point: this works better for uneven hand-drawn circles.
+ const cx=(minX+maxX)/2,cy=(minY+maxY)/2,rx=w/2,ry=h/2;
+ const radial=pts.map(p=>Math.hypot((p.x-cx)/Math.max(rx,.001),(p.y-cy)/Math.max(ry,.001)));
+ const mean=radial.reduce((a,b)=>a+b,0)/radial.length;
+ const variance=radial.reduce((a,b)=>a+(b-mean)**2,0)/radial.length;
+ const cv=Math.sqrt(variance)/Math.max(mean,.001);
+ const aspect=w/Math.max(h,.001);
+ if(closed&&pts.length>=12&&cv<.27&&aspect>.58&&aspect<1.72){
+   const circle=[];
+   for(let i=0;i<72;i++){const a=i/72*Math.PI*2;circle.push({x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry});}
+   return {points:circle,shape:Math.abs(w-h)/Math.max(w,h)<.16?'circle':'ellipse'};
+ }
+ // Remove repeated points and the duplicate closing point before corner detection.
+ let path=pts.filter((p,i)=>i===0||distPx(p,pts[i-1])>3);
+ if(path.length>3&&distPx(path[0],path[path.length-1])<closeThreshold)path.pop();
+ if(path.length<3)return {points:pts,shape:'freeform'};
+ // Closed polygons can be simplified; an RDP pass identifies hand-drawn triangles and rectangles.
+ function simplify(arr,tol){
+   if(arr.length<3)return arr;
+   const a=arr[0],b=arr[arr.length-1],dx=b.x-a.x,dy=b.y-a.y,den=dx*dx+dy*dy;
+   let max=0,idx=0;
+   for(let i=1;i<arr.length-1;i++){
+     const p=arr[i],u=den?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/den)):0;
+     const d=Math.hypot(p.x-(a.x+u*dx),p.y-(a.y+u*dy));
+     if(d>max){max=d;idx=i;}
+   }
+   if(max>tol){const left=simplify(arr.slice(0,idx+1),tol),right=simplify(arr.slice(idx),tol);return left.slice(0,-1).concat(right);}
+   return [a,b];
+ }
+ let corners=simplify(path,.035);
+ if(corners.length>1&&Math.hypot(corners[0].x-corners[corners.length-1].x,corners[0].y-corners[corners.length-1].y)<.08)corners=corners.slice(0,-1);
+ if(closed&&corners.length===3)return {points:corners,shape:'triangle'};
+ if(closed&&corners.length===4){
+   // Snap near-horizontal/vertical sides into a clean rectangle when its corners are close to the bounding box.
+   const boxCorners=[{x:minX,y:minY},{x:maxX,y:minY},{x:maxX,y:maxY},{x:minX,y:maxY}];
+   const cornerFit=corners.every(c=>boxCorners.some(b=>Math.hypot(c.x-b.x,c.y-b.y)<.13));
+   if(cornerFit)return {points:boxCorners,shape:'rectangle'};
+ }
+ return {points:path,shape:'freeform'};
+}
 $('#createCustomPartBtn').addEventListener('click',()=>{if(sketchPoints.length<3)return say('Draw a larger outline with at least 3 points first');checkpoint();const corrected=correctedOutline(sketchPoints);const thickness=Math.max(1,Math.min(100,Number($('#customThickness').value)||10))/50;const name=$('#customPartName').value.trim()||'Custom part';const p=createCustomPart(corrected.points,name,thickness);if(p){updateCounts();refreshConnectionVisuals();say(corrected.shape==='freeform'?'Custom outline converted to 3D':('Smart sketch corrected to '+corrected.shape+' and converted to 3D'));}});paintSketch();
 $('#undoBtn').addEventListener('click',undo);
 $('#moveBtn').addEventListener('click',()=>{moveMode=!moveMode;connectMode=false;firstConnection=null;$('#connectModeBtn').textContent='＋ Connect parts: OFF';$('#moveBtn').textContent=moveMode?'✥ Drag move: ON':'✥ Drag move';controls.enabled=!moveMode;say(moveMode?'Move mode: drag a selected part':'Orbit mode: drag empty space to orbit');});
