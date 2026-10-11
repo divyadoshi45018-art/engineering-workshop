@@ -42,3 +42,8 @@ The page loads Three.js and OrbitControls from jsDelivr CDN, so the first load r
 - Smart outline correction recognizes closed hand-drawn circles/ellipses, rectangles, and triangles before extrusion; irregular outlines remain freeform. This is deterministic geometric recognition, not a cloud AI service.
 - Searchable category folders provide 203 nominally dimensioned fasteners, shafts/bearings, gears/drives, wheels/motion parts, structural hardware/springs, and motors/mechanisms.
 - The catalogue shows length × height × width in mm and creates procedural 3D visual approximations. These are not manufacturer CAD files; validate exact standards and dimensions against supplier datasheets before making parts.
+
+
+## Arduino & Electronics folder
+
+The searchable parts library now includes a separate **Arduino & Electronics** category with 209 catalogue entries, including Arduino Uno/Mega/Nano boards, breadboards, jumper wires, sensors, Wi-Fi/Bluetooth modules, motor drivers, servos, LEDs, resistors, displays, power modules, and related components. These are procedural visual models with nominal reference dimensions; verify pinouts, voltage/current limits, and exact dimensions against manufacturer datasheets before building circuits or fabricating parts.
