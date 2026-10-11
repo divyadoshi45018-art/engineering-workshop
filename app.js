@@ -12,9 +12,20 @@ const catalogById=new Map(MECHANICAL_CATALOG.map(p=>[p.id,p]));
 const viewport = $('#viewport'), viewportWrap = $('#viewportWrap'), statusEl = $('#status');
 const scene = new THREE.Scene(); scene.background = new THREE.Color('#0b1420');
 const camera = new THREE.PerspectiveCamera(48,1,.1,1000); camera.position.set(7,6,9);
-const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; renderer.outputColorSpace=THREE.SRGBColorSpace;
-viewport.appendChild(renderer.domElement);
+let renderer;
+try {
+ renderer = new THREE.WebGLRenderer({antialias:false,alpha:false,powerPreference:'low-power'});
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+ renderer.shadowMap.enabled=true;
+ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ renderer.outputColorSpace=THREE.SRGBColorSpace;
+ viewport.appendChild(renderer.domElement);
+} catch (error) {
+ console.error('3D renderer initialization failed:', error);
+ statusEl.textContent='3D graphics failed to start: '+(error?.message||error);
+ statusEl.style.color='#ff8b8b';
+ throw error;
+}
 const controls = new OrbitControls(camera,renderer.domElement); controls.enableDamping=true; controls.target.set(0,.6,0);
 const clock=new THREE.Clock();
 let viewMode='orbit', roomModel=null;
