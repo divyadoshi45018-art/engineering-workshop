@@ -42,3 +42,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:12px;max-width:1
 .object-project-output li{margin:4px 0}
 .project-warning{padding:9px;border:1px solid #695235;border-radius:7px;background:#211b13;color:#ffd9a0}
 @media(max-width:700px){.scan-actions>*{flex:1 1 auto}.scan-file{justify-content:center}.scan-file input{max-width:45vw}.object-detections{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.model-source-links{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:10px;padding:9px;background:#0d1722;border:1px solid var(--line);border-radius:8px;font-size:10px}
+.model-source-links b{width:100%;color:var(--muted)}
+.model-source-links a{color:var(--blue);text-decoration:underline;text-underline-offset:2px}
