@@ -132,6 +132,15 @@ function createPart(type,position=null,opts={}){
  if(opts.id!=null)nextId=Math.max(nextId,opts.id+1);
  g.position.copy(position||new THREE.Vector3((parts.length%4-1.5)*1.7,.65,Math.floor(parts.length/4)*1.55));
  scene.add(g);g.updateMatrixWorld(true);const bb=new THREE.Box3().setFromObject(g);const sz=bb.getSize(new THREE.Vector3());g.userData.baseSize.set(Math.max(.05,sz.x),Math.max(.05,sz.y),Math.max(.05,sz.z));
+ const catalogSpec=MECHANICAL_CATALOG.find(item=>item.id===type);
+ if(catalogSpec){
+   // One world unit represents 10 mm. Fit the generated visual to the catalogue's nominal XYZ envelope.
+   // This corrects distorted generic meshes while keeping the real-world aspect ratio.
+   const target=new THREE.Vector3(...catalogSpec.dimensions.map(v=>Math.max(.1,Number(v)||.1)/10));
+   g.scale.set(target.x/Math.max(.001,sz.x),target.y/Math.max(.001,sz.y),target.z/Math.max(.001,sz.z));
+   g.userData.baseSize.copy(sz);
+   g.userData.nominalDimensionsMm=catalogSpec.dimensions.slice();
+ }
  parts.push(g);
  if(!opts.silent){select(g);say(name+' added to bench');}
  return g;
@@ -310,13 +319,15 @@ const catalogFilters=$('#catalogFilters'),catalogResults=$('#catalogResults'),ca
 function renderCatalog(){const q=(catalogSearch.value||'').trim().toLowerCase();const cats=['All',...new Set(MECHANICAL_CATALOG.map(p=>p.category))];catalogFilters.innerHTML='';cats.forEach(c=>{const b=document.createElement('button');b.textContent=c;b.className='catalog-filter'+(activeCatalogCategory===c?' active':'');b.addEventListener('click',()=>{activeCatalogCategory=c;renderCatalog();});catalogFilters.appendChild(b);});const rows=MECHANICAL_CATALOG.filter(p=>(activeCatalogCategory==='All'||p.category===activeCatalogCategory)&&(!q||(p.name+' '+p.category+' '+p.dimensions.join(' ')).toLowerCase().includes(q)));catalogResults.innerHTML='';rows.forEach(p=>{const b=document.createElement('button');b.className='catalog-item';const title=document.createElement('b');title.textContent=p.name;const meta=document.createElement('span');meta.textContent=p.category+' · '+p.dimensions.join(' × ')+' mm';b.append(title,meta);b.addEventListener('click',()=>{checkpoint();const obj=createPart(p.id);if(obj){obj.userData.catalogId=p.id;obj.userData.name=p.name;select(obj);updateCounts();say(p.name+' added · nominal '+p.dimensions.join(' × ')+' mm');}});catalogResults.appendChild(b);});if(!rows.length)catalogResults.innerHTML='<p class="catalog-empty">No matching parts. Try another search.</p>';}
 catalogSearch.addEventListener('input',renderCatalog);renderCatalog();
 
-const sketch=$('#partSketch'),sketchCtx=sketch.getContext('2d');let sketchPoints=[],sketching=false;
+const sketch=$('#partSketch'),sketchCtx=sketch.getContext('2d');let sketchPoints=[],sketching=false,sketchFrozen=false;
 function paintSketch(){sketchCtx.clearRect(0,0,sketch.width,sketch.height);sketchCtx.fillStyle='#0b1420';sketchCtx.fillRect(0,0,sketch.width,sketch.height);sketchCtx.strokeStyle='#26364b';sketchCtx.lineWidth=1;for(let x=0;x<sketch.width;x+=26){sketchCtx.beginPath();sketchCtx.moveTo(x,0);sketchCtx.lineTo(x,sketch.height);sketchCtx.stroke();}for(let y=0;y<sketch.height;y+=26){sketchCtx.beginPath();sketchCtx.moveTo(0,y);sketchCtx.lineTo(sketch.width,y);sketchCtx.stroke();}if(sketchPoints.length){sketchCtx.beginPath();sketchCtx.moveTo(sketchPoints[0].x*sketch.width,sketchPoints[0].y*sketch.height);sketchPoints.slice(1).forEach(p=>sketchCtx.lineTo(p.x*sketch.width,p.y*sketch.height));sketchCtx.strokeStyle='#6ce3c1';sketchCtx.lineWidth=4;sketchCtx.lineJoin='round';sketchCtx.lineCap='round';sketchCtx.stroke();sketchPoints.forEach(p=>{sketchCtx.beginPath();sketchCtx.arc(p.x*sketch.width,p.y*sketch.height,3,0,Math.PI*2);sketchCtx.fillStyle='#edf4ff';sketchCtx.fill();});}else{sketchCtx.fillStyle='#91a4bb';sketchCtx.font='14px system-ui';sketchCtx.fillText('Draw the outline of your part here',14,sketch.height/2);}}
 function sketchPoint(e){const r=sketch.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))};}
-sketch.addEventListener('pointerdown',e=>{sketching=true;sketch.setPointerCapture(e.pointerId);sketchPoints=[sketchPoint(e)];paintSketch();});
+sketch.addEventListener('pointerdown',e=>{if(sketchFrozen){say('Sketch is frozen. Unfreeze it to draw again.');return;}sketching=true;sketch.setPointerCapture(e.pointerId);sketchPoints=[sketchPoint(e)];paintSketch();});
 sketch.addEventListener('pointermove',e=>{if(!sketching)return;const p=sketchPoint(e),last=sketchPoints[sketchPoints.length-1];if(Math.hypot((p.x-last.x)*sketch.width,(p.y-last.y)*sketch.height)>4){sketchPoints.push(p);paintSketch();}});
 function stopSketch(){sketching=false;}sketch.addEventListener('pointerup',stopSketch);sketch.addEventListener('pointercancel',stopSketch);
-$('#clearSketchBtn').addEventListener('click',()=>{sketchPoints=[];paintSketch();say('Sketch cleared');});
+$('#clearSketchBtn').addEventListener('click',()=>{if(sketchFrozen)return say('Unfreeze the sketch before clearing it');sketchPoints=[];paintSketch();say('Sketch cleared');});
+$('#smartFixSketchBtn').addEventListener('click',()=>{if(sketchPoints.length<3)return say('Draw a shape first');const result=correctedOutline(sketchPoints);sketchPoints=result.points;paintSketch();say('Smart correction applied: '+result.shape);});
+$('#freezeSketchBtn').addEventListener('click',()=>{sketchFrozen=!sketchFrozen;$('#freezeSketchBtn').textContent=sketchFrozen?'Unfreeze sketch':'Freeze sketch';$('#freezeSketchBtn').classList.toggle('active',sketchFrozen);say(sketchFrozen?'Sketch frozen — you can create the 3D part safely':'Sketch unlocked for editing');});
 function correctedOutline(input){
  const pts=input.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>({x:Math.max(0,Math.min(1,p.x)),y:Math.max(0,Math.min(1,p.y))}));
  if(pts.length<3)return {points:pts,shape:'freeform'};
