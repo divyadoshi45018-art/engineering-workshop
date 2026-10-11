@@ -235,9 +235,9 @@ function circuitIsClosed(){
  const edge=(a,b,kind)=>{if(!graph.has(a))graph.set(a,[]);if(!graph.has(b))graph.set(b,[]);graph.get(a).push({to:b,kind});graph.get(b).push({to:a,kind});};
  connections.filter(c=>c.kind==='electrical').forEach(c=>edge(key(c.a,c.aPort??0),key(c.b,c.bPort??0),'link'));
  for(const p of parts){
-  if(!electrical(p)||p.userData.type==='battery'||p.userData.type==='capacitor'||p.userData.type==='diode')continue;
+  if(!electrical(p)||p.userData.type==='battery'||p.userData.type==='capacitor')continue;
   if(p.userData.type==='switch'&&!p.userData.switchOn)continue;
-  const ports=localPorts(p);if(ports.length>=2)edge(key(p.userData.id,0),key(p.userData.id,1),p.userData.type);
+  const ports=localPorts(p);if(ports.length>=2){const a=key(p.userData.id,0),b=key(p.userData.id,1);if(p.userData.type==='diode'){if(!graph.has(a))graph.set(a,[]);graph.get(a).push({to:b,kind:'diode'});}else edge(a,b,p.userData.type);}
  }
  const pathHas=(required)=>{
   const start=key(battery.userData.id,0),end=key(battery.userData.id,1);
@@ -254,6 +254,8 @@ function circuitIsClosed(){
  };
  const litLamps=lamps.filter(l=>pathHas([l.userData.type,'resistor'])||pathHas([l.userData.type,'photoresistor']));const lamp=litLamps[0];
  if(lamp){if(!sw)return {ok:false,reason:'Add a switch to control the light.'};if(!sw.userData.switchOn)return {ok:false,reason:'Circuit path found. Turn the switch ON.'};return {ok:true,reason:'Closed circuit · '+litLamps.length+' light'+(litLamps.length===1?'':'s')+' powered',kind:'light',lamp,lamps:litLamps};}
+ const buzzer=parts.find(p=>p.userData.type==='buzzer'&&pathHas(['buzzer']));
+ if(buzzer){if(!sw)return {ok:false,reason:'Add a switch to control the buzzer.'};if(!sw.userData.switchOn)return {ok:false,reason:'Buzzer circuit connected. Turn the switch ON.'};return {ok:true,reason:'Closed circuit · buzzer active',kind:'buzzer',buzzer};}
  const motor=motors.find(()=>pathHas(['motor']));
  if(motor){if(!sw)return {ok:false,reason:'Add a switch to control the motor.'};if(!sw.userData.switchOn)return {ok:false,reason:'Motor circuit connected. Turn the switch ON.'};return {ok:true,reason:'Closed circuit · motor powered',kind:'motor',motor};}
  if(!sw)return {ok:false,reason:'Add a switch to control the circuit.'};
