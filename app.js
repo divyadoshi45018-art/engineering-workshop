@@ -379,10 +379,10 @@ function importPrintablePart(file){
    group.position.set((parts.length%4-1.5)*1.7,.8,Math.floor(parts.length/4)*1.55);
    group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(!o.material)o.material=material(0x8ca4bb,.35,.4);}});
    group.userData.isPart=true;group.userData.type='imported';group.userData.name=group.name;group.userData.id=nextId++;group.userData.tint=0x8ca4bb;
-   scene.add(group);group.updateMatrixWorld(true);
+   checkpoint();scene.add(group);group.updateMatrixWorld(true);
    const b2=new THREE.Box3().setFromObject(group),sz=b2.getSize(new THREE.Vector3());
-   group.userData.baseSize.set(Math.max(.05,sz.x),Math.max(.05,sz.y),Math.max(.05,sz.z));
-   checkpoint();parts.push(group);select(group);updateCounts();refreshConnectionVisuals();
+   group.userData.baseSize=new THREE.Vector3(Math.max(.05,sz.x),Math.max(.05,sz.y),Math.max(.05,sz.z));
+   parts.push(group);select(group);updateCounts();refreshConnectionVisuals();
    say('Imported 3D model: '+group.userData.name+' · normalized to fit the bench');
   }catch(err){fail(err);}
   URL.revokeObjectURL(url);
