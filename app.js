@@ -55,7 +55,11 @@ function createPart(type,position=null,opts={}){
  case'resistor':name='Resistor';addMesh(g,new THREE.CylinderGeometry(.13,.13,.68,24),material(0xd8b778,.15,.35),[0,0,0],[0,0,Math.PI/2]);for(let i=0;i<4;i++)addMesh(g,new THREE.CylinderGeometry(.14,.14,.045,24),material([0x9a4f2f,0x353535,0xc34b35,0xd5a83c][i]),[-.24+i*.15,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.45,10),metal,[-.55,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.45,10),metal,[.55,0,0],[0,0,Math.PI/2]);break;
  case'chip':name='IC chip';addMesh(g,new THREE.BoxGeometry(.68,.16,.68),dark);addMesh(g,new THREE.BoxGeometry(.42,.04,.42),material(0x111820),[0,.1,0]);for(let i=0;i<4;i++){const o=-.24+i*.16;addMesh(g,new THREE.BoxGeometry(.09,.035,.18),metal,[o,-.015,.4]);addMesh(g,new THREE.BoxGeometry(.09,.035,.18),metal,[o,-.015,-.4]);addMesh(g,new THREE.BoxGeometry(.18,.035,.09),metal,[.4,-.015,o]);addMesh(g,new THREE.BoxGeometry(.18,.035,.09),metal,[-.4,-.015,o]);}break;
  case'board':name='Base plate';addMesh(g,new THREE.BoxGeometry(1.7,.12,1.25),material(0x28634f,.25,.45));for(let x=-.65;x<=.66;x+=.22)for(let z=-.45;z<=.46;z+=.22)addMesh(g,new THREE.CylinderGeometry(.025,.025,.015,8),material(0xc7d6bd),[x,.07,z]);break;
- case'wire':name='Wire piece';makeWirePiece(g);break;
+ case'wire':name='Wire';makeWirePiece(g);break;
+ case'capacitor':name='Capacitor';addMesh(g,new THREE.CylinderGeometry(.24,.24,.52,28),material(0x4778a8,.35,.3),[0,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.27,.27,.06,28),metal,[0,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.48,10),metal,[-.55,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.48,10),metal,[.55,0,0],[0,0,Math.PI/2]);break;
+ case'diode':name='Diode';addMesh(g,new THREE.CylinderGeometry(.13,.13,.42,20),material(0x202833,.2,.4),[0,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.14,.14,.06,20),material(0xe8edf4),[.12,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.5,10),metal,[-.45,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.5,10),metal,[.45,0,0],[0,0,Math.PI/2]);break;
+ case'buzzer':name='Buzzer';addMesh(g,new THREE.CylinderGeometry(.38,.38,.2,32),material(0x273849,.45,.35));addMesh(g,new THREE.CylinderGeometry(.31,.31,.035,32),material(0x111820),[0,.12,0]);addMesh(g,new THREE.TorusGeometry(.18,.018,8,24),metal,[0,.145,0]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.3,10),metal,[-.22,-.12,0]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.3,10),metal,[.22,-.12,0]);break;
+ case'photoresistor':name='Photoresistor';addMesh(g,new THREE.CylinderGeometry(.28,.28,.16,24),material(0x8eaa52,.2,.4),[0,0,0],[0,0,Math.PI/2]);for(let i=0;i<3;i++)addMesh(g,new THREE.TorusGeometry(.06+i*.055,.012,6,18),material(0x354b27),[0,0,0],[0,Math.PI/2,0]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.45,10),metal,[-.55,0,0],[0,0,Math.PI/2]);addMesh(g,new THREE.CylinderGeometry(.025,.025,.45,10),metal,[.55,0,0],[0,0,Math.PI/2]);break;
  default:return null;
  }
  g.userData.isPart=true;g.userData.type=type;g.userData.name=name;g.userData.id=opts.id??nextId++;g.userData.tint=mainColor;g.userData.lightMesh=lightMesh;g.userData.baseSize=new THREE.Vector3(1,1,1);
@@ -94,7 +98,7 @@ function checkpoint(){history.push(JSON.stringify(serialize()));if(history.lengt
 function load(data){simulationRunning=false;clearScene();nextId=1;(data.parts||[]).forEach(d=>{const p=createPart(d.type,new THREE.Vector3(...d.position),{id:d.id,silent:true});if(!p)return;p.rotation.set(d.rotation[0],d.rotation[1],d.rotation[2]);p.scale.set(...d.scale);if(d.tint!=null)setTint(p,d.tint);if(p.userData.type==='switch'&&d.switchOn)toggleSwitch(p,true);});connections=(data.connections||[]).filter(c=>partById(c.a)&&partById(c.b));refreshConnectionVisuals();select(null);updateCounts();updateCircuitStatus('Simulation stopped','');}
 function undo(){if(!history.length)return say('Nothing to undo');const d=JSON.parse(history.pop());load(d);$('#undoBtn').disabled=history.length===0;say('Last edit undone');}
 function updateCounts(){$('#partCount').textContent=parts.length+' part'+(parts.length===1?'':'s');$('#connectionCount').textContent=connections.length+' link'+(connections.length===1?'':'s');}
-function electricalPart(p){return !!p&&['battery','led','bulb','switch','resistor','chip','motor'].includes(p.userData.type);}
+function electricalPart(p){return !!p&&['battery','led','bulb','switch','resistor','chip','motor','wire','capacitor','diode','buzzer','photoresistor'].includes(p.userData.type);}
 function localPorts(p){
  const t=p.userData.type;
  if(t==='battery')return [new THREE.Vector3(0,.64,0),new THREE.Vector3(0,-.61,0)];
@@ -105,6 +109,8 @@ function localPorts(p){
  if(t==='chip')return [new THREE.Vector3(-.4,0,0),new THREE.Vector3(.4,0,0)];
  if(t==='motor')return [new THREE.Vector3(-.16,-.58,.12),new THREE.Vector3(.17,-.58,.12)];
  if(t==='wire')return [new THREE.Vector3(-.8,0,0),new THREE.Vector3(.8,0,0)];
+ if(t==='capacitor'||t==='diode'||t==='photoresistor')return [new THREE.Vector3(-.72,0,0),new THREE.Vector3(.72,0,0)];
+ if(t==='buzzer')return [new THREE.Vector3(-.42,-.12,0),new THREE.Vector3(.42,-.12,0)];
  return [new THREE.Vector3(0,0,0)];
 }
 function worldPorts(p){return localPorts(p).map(v=>p.localToWorld(v.clone()));}
@@ -162,7 +168,7 @@ function autoFitMechanical(a,b){
  }
  return '';
 }
-function electrical(p){return ['battery','led','bulb','switch','resistor','chip','motor'].includes(p.userData.type);}
+function electrical(p){return ['battery','led','bulb','switch','resistor','chip','motor','wire','capacitor','diode','buzzer','photoresistor'].includes(p.userData.type);}
 function canAutoFitMechanical(a,b){
  const x=a.userData.type,y=b.userData.type;
  const pair=(a1,b1)=>x===a1&&y===b1||x===b1&&y===a1;
@@ -182,13 +188,14 @@ function connectParts(a,b){
  }else{
    const note=autoFitMechanical(a,b);if(note){link.autoFitted=true;say(note);}
  }
- connections.push(link);refreshConnectionVisuals();
- if(isElectrical)say('Wire joined terminal ↔ terminal');
+ connections.push(link);refreshConnectionVisuals();if(simulationRunning)refreshSimulation();
+ if(isElectrical)say('Electrical terminals connected');
  else if(!['gear','bearing','wheel','bolt','washer','motor','shaft'].includes(a.userData.type)&&!['gear','bearing','wheel','bolt','washer','motor','shaft'].includes(b.userData.type))say('Assembly link added');
  firstConnection=null;
 }
+function autoSnapWire(wire){if(!wire||wire.userData.type!=='wire')return;const used=new Set(connections.filter(c=>c.a===wire.userData.id||c.b===wire.userData.id).map(c=>c.a===wire.userData.id?c.aPort:c.bPort));for(let wi=0;wi<2;wi++){if(used.has(wi))continue;wire.updateMatrixWorld(true);const wp=worldPorts(wire)[wi];let best=null,bestD=.95;for(const p of parts){if(p===wire||!electrical(p))continue;const pp=worldPorts(p);for(let pi=0;pi<pp.length;pi++){if(connections.some(c=>c.kind==='electrical'&&((c.a===p.userData.id&&(c.aPort??0)===pi)||(c.b===p.userData.id&&(c.bPort??0)===pi))))continue;const d=wp.distanceTo(pp[pi]);if(d<bestD){bestD=d;best={p,pi,point:pp[pi].clone()};}}}if(best){wire.position.add(best.point.sub(wp));wire.updateMatrixWorld(true);connections.push({a:wire.userData.id,b:best.p.userData.id,kind:'electrical',aPort:wi,bPort:best.pi,color:0xf1b65d});used.add(wi);say('Wire snapped onto '+best.p.userData.name+' terminal');}}refreshConnectionVisuals();}
 function electronic(p){return electrical(p);}
-function add(type){checkpoint();const p=createPart(type);updateCounts();return p;}
+function add(type){checkpoint();let pos=null;if(type==='wire'){const anchor=(selected&&electrical(selected))?selected:parts.find(p=>p.userData.type==='battery')||parts.find(electrical);if(anchor)pos=anchor.position.clone().add(new THREE.Vector3(.8,0,0));}const p=createPart(type,pos);if(type==='wire')autoSnapWire(p);updateCounts();return p;}
 document.querySelectorAll('[data-part]').forEach(b=>b.addEventListener('click',()=>add(b.dataset.part)));
 $('#undoBtn').addEventListener('click',undo);
 $('#moveBtn').addEventListener('click',()=>{moveMode=!moveMode;connectMode=false;firstConnection=null;$('#connectModeBtn').textContent='＋ Connect parts: OFF';$('#moveBtn').textContent=moveMode?'✥ Drag move: ON':'✥ Drag move';controls.enabled=!moveMode;say(moveMode?'Move mode: drag a selected part':'Orbit mode: drag empty space to orbit');});
@@ -215,10 +222,45 @@ renderer.domElement.addEventListener('pointerdown',e=>{setPointer(e);const hits=
  select(p);if(moveMode){checkpoint();if(raycaster.ray.intersectPlane(plane,hit))drag={id:e.pointerId,obj:p,offset:p.position.clone().sub(hit)};renderer.domElement.setPointerCapture(e.pointerId);}
 });
 renderer.domElement.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;setPointer(e);if(raycaster.ray.intersectPlane(plane,hit)){drag.obj.position.x=hit.x+drag.offset.x;drag.obj.position.z=hit.z+drag.offset.z;refreshConnectionVisuals();}});
-function endDrag(e){if(drag&&drag.id===e.pointerId){const moved=drag.obj;drag=null;const candidate=parts.filter(p=>p!==moved&&canAutoFitMechanical(moved,p)).map(p=>({p,d:p.position.distanceTo(moved.position)})).filter(x=>x.d<1.35).sort((a,b)=>a.d-b.d)[0]?.p;if(candidate){const linked=connections.some(c=>(c.a===moved.userData.id&&c.b===candidate.userData.id)||(c.a===candidate.userData.id&&c.b===moved.userData.id));if(linked){const note=autoFitMechanical(moved,candidate);refreshConnectionVisuals();say(note||'Part snapped into place');}else connectParts(moved,candidate);}else say('Part moved');}}renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);
+function endDrag(e){if(drag&&drag.id===e.pointerId){const moved=drag.obj;drag=null;const candidate=parts.filter(p=>p!==moved&&canAutoFitMechanical(moved,p)).map(p=>({p,d:p.position.distanceTo(moved.position)})).filter(x=>x.d<1.35).sort((a,b)=>a.d-b.d)[0]?.p;if(moved.userData.type==='wire'){connections=connections.filter(c=>c.a!==moved.userData.id&&c.b!==moved.userData.id);autoSnapWire(moved);if(simulationRunning)refreshSimulation();}else if(candidate){const linked=connections.some(c=>(c.a===moved.userData.id&&c.b===candidate.userData.id)||(c.a===candidate.userData.id&&c.b===moved.userData.id));if(linked){const note=autoFitMechanical(moved,candidate);refreshConnectionVisuals();say(note||'Part snapped into place');}else connectParts(moved,candidate);}else say('Part moved');}}renderer.domElement.addEventListener('pointerup',endDrag);renderer.domElement.addEventListener('pointercancel',endDrag);
 function toggleSwitch(p,on=null){if(!p||p.userData.type!=='switch')return false;p.userData.switchOn=on==null?!p.userData.switchOn:!!on;const lever=p.userData.lever;if(lever){lever.rotation.z=p.userData.switchOn ? 0.5 : -0.5;lever.material.color.setHex(p.userData.switchOn?0x6ce3c1:0xe5ecf4);}return p.userData.switchOn;}
 function getCircuitParts(){return {battery:parts.find(p=>p.userData.type==='battery'),switch:parts.find(p=>p.userData.type==='switch'),resistor:parts.find(p=>p.userData.type==='resistor'),lamp:parts.find(p=>['led','bulb'].includes(p.userData.type)),motor:parts.find(p=>p.userData.type==='motor')};}
-function circuitIsClosed(){const c=getCircuitParts();if(!c.battery||!c.switch)return {ok:false,reason:'Add a battery and switch first.'};const hasEdge=(a,b)=>connections.some(link=>(link.a===a&&link.b===b)||(link.a===b&&link.b===a));const exactLoop=(ids,expected,count)=>connections.filter(link=>ids.includes(link.a)&&ids.includes(link.b)).length===count&&expected.every(([a,b])=>hasEdge(a,b));let kind=null,ids=null;if(c.lamp&&c.resistor){const lightIds=[c.battery.userData.id,c.switch.userData.id,c.resistor.userData.id,c.lamp.userData.id],lightEdges=[[lightIds[0],lightIds[1]],[lightIds[1],lightIds[2]],[lightIds[2],lightIds[3]],[lightIds[3],lightIds[0]]];if(exactLoop(lightIds,lightEdges,4)){kind='light';ids=lightIds;}}if(!kind&&c.motor){const motorIds=[c.battery.userData.id,c.switch.userData.id,c.motor.userData.id],motorEdges=[[motorIds[0],motorIds[1]],[motorIds[1],motorIds[2]],[motorIds[2],motorIds[0]]];if(exactLoop(motorIds,motorEdges,3)){kind='motor';ids=motorIds;}}if(!kind){if(c.lamp&&c.resistor)return {ok:false,reason:'Wire the light loop: battery → switch → resistor → light → battery.'};if(c.motor)return {ok:false,reason:'Wire the motor loop: battery → switch → motor → battery.'};if(c.lamp&&!c.resistor)return {ok:false,reason:'Add a resistor in series with the LED/bulb, or connect a DC motor loop.'};return {ok:false,reason:'Add an LED/bulb plus resistor, or use a DC motor.'};}if(!c.switch.userData.switchOn)return {ok:false,reason:'Loop connected. Switch is OFF — toggle it ON.'};return {ok:true,reason:kind==='motor'?'Closed loop · motor powered':'Closed loop · light powered',kind};}
+function circuitIsClosed(){
+ const battery=parts.find(p=>p.userData.type==='battery'),sw=parts.find(p=>p.userData.type==='switch');
+ const lamps=parts.filter(p=>['led','bulb'].includes(p.userData.type));
+ const resistors=parts.filter(p=>['resistor','photoresistor'].includes(p.userData.type));
+ const motors=parts.filter(p=>p.userData.type==='motor');
+ if(!battery)return {ok:false,reason:'Add a battery first.'};
+ const key=(id,port)=>String(id)+':'+String(port),graph=new Map();
+ const edge=(a,b,kind)=>{if(!graph.has(a))graph.set(a,[]);if(!graph.has(b))graph.set(b,[]);graph.get(a).push({to:b,kind});graph.get(b).push({to:a,kind});};
+ connections.filter(c=>c.kind==='electrical').forEach(c=>edge(key(c.a,c.aPort??0),key(c.b,c.bPort??0),'link'));
+ for(const p of parts){
+  if(!electrical(p)||p.userData.type==='battery'||p.userData.type==='capacitor'||p.userData.type==='diode')continue;
+  if(p.userData.type==='switch'&&!p.userData.switchOn)continue;
+  const ports=localPorts(p);if(ports.length>=2)edge(key(p.userData.id,0),key(p.userData.id,1),p.userData.type);
+ }
+ const pathHas=(required)=>{
+  const start=key(battery.userData.id,0),end=key(battery.userData.id,1);
+  const q=[{node:start,seen:new Set([start]),kinds:new Set()}],visited=new Set();
+  while(q.length){
+   const cur=q.shift(),sig=cur.node+'|'+Array.from(cur.kinds).sort().join(',');
+   if(visited.has(sig))continue;visited.add(sig);
+   if(cur.node===end&&required.every(k=>cur.kinds.has(k)))return true;
+   for(const e of graph.get(cur.node)||[]){
+    const kinds=new Set(cur.kinds);if(['bulb','led','resistor','photoresistor','motor','buzzer'].includes(e.kind))kinds.add(e.kind);
+    if(!cur.seen.has(e.to)){const seen=new Set(cur.seen);seen.add(e.to);q.push({node:e.to,seen,kinds});}
+   }
+  }return false;
+ };
+ const lamp=lamps.find(l=>pathHas([l.userData.type,'resistor'])||pathHas([l.userData.type,'photoresistor']));
+ if(lamp){if(!sw)return {ok:false,reason:'Add a switch to control the light.'};if(!sw.userData.switchOn)return {ok:false,reason:'Circuit path found. Turn the switch ON.'};return {ok:true,reason:'Closed circuit · '+lamp.userData.name+' glowing',kind:'light',lamp};}
+ const motor=motors.find(()=>pathHas(['motor']));
+ if(motor){if(!sw)return {ok:false,reason:'Add a switch to control the motor.'};if(!sw.userData.switchOn)return {ok:false,reason:'Motor circuit connected. Turn the switch ON.'};return {ok:true,reason:'Closed circuit · motor powered',kind:'motor',motor};}
+ if(!sw)return {ok:false,reason:'Add a switch to control the circuit.'};
+ if(!lamps.length&&!motors.length)return {ok:false,reason:'Add a bulb/LED and resistor, or a DC motor.'};
+ if(lamps.length&&!resistors.length)return {ok:false,reason:'Add a resistor in series with the LED/bulb.'};
+ return {ok:false,reason:'Circuit is open. Connect both battery terminals through the switch and load.'};
+}
 function updateCircuitStatus(text,kind){const el=$('#circuitStatus');el.className='circuit-status'+(kind?' '+kind:'');el.lastElementChild.textContent=text;}
 function refreshSimulation(){parts.forEach(p=>{if(p.userData.lightMesh)setGlow(p,false);});const c=circuitIsClosed();if(!simulationRunning){updateCircuitStatus('Simulation stopped','');return;}if(!c.ok){updateCircuitStatus(c.reason,'fault');return;}if(c.kind==='light')setGlow(c.lamp,true);updateCircuitStatus(c.reason,'running');}
 $('#demoMotorBtn').addEventListener('click',()=>{if(parts.length&&!confirm('Build the motor demo? This replaces the current bench.'))return;checkpoint();simulationRunning=false;clearScene();nextId=1;const battery=createPart('battery',new THREE.Vector3(-2.4,.65,0),{silent:true});const sw=createPart('switch',new THREE.Vector3(-.3,.65,0),{silent:true});const motor=createPart('motor',new THREE.Vector3(1.7,.65,0),{silent:true});connections=[{a:battery.userData.id,b:sw.userData.id,kind:'electrical',aPort:0,bPort:0,color:0xe95d5d},{a:sw.userData.id,b:motor.userData.id,kind:'electrical',aPort:1,bPort:0},{a:motor.userData.id,b:battery.userData.id,kind:'electrical',aPort:1,bPort:1}];refreshConnectionVisuals();select(sw);toggleSwitch(sw,false);updateCounts();refreshSimulation();say('Motor loop built. Tap Run, then switch ON to spin the shaft.');});
