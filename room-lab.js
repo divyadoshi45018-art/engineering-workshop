@@ -83,3 +83,69 @@ async function analyze(){
 }
 analyzeBtn?.addEventListener('click',analyze);
 window.addEventListener('pagehide',stopCamera);
+
+
+// Geometry estimate panel: image-plane ratios plus optional single-axis calibration.
+// A single photograph cannot reveal true depth or perspective-correct dimensions.
+(function addGeometryEstimator(){
+ const host=byId('objectDetections'); if(!host || byId('geometryEstimatePanel')) return;
+ const panel=document.createElement('section');
+ panel.id='geometryEstimatePanel';
+ panel.className='geometry-estimate-panel';
+ panel.innerHTML=`
+  <h3>Geometry & scale estimate</h3>
+  <p>Choose a detected object. Ratios come from its 2D bounding box; calibration estimates only the visible plane, not hidden depth.</p>
+  <div class="geometry-estimate-grid">
+   <label>Known visible width (cm)<input id="scanKnownWidth" type="number" min="0.1" max="10000" step="0.1" placeholder="e.g. 30"></label>
+   <label>Known visible height (cm)<input id="scanKnownHeight" type="number" min="0.1" max="10000" step="0.1" placeholder="optional"></label>
+  </div>
+  <div id="scanGeometryReadout" class="scan-geometry-readout">Analyze a photo, then select a detection.</div>
+  <button type="button" id="applyScanEstimateBtn" class="wide" disabled>Use estimate for project dimensions</button>
+  <p class="sketch-note">For better estimates: photograph the object straight-on, avoid wide-angle close-ups, and include a ruler in the same plane. This is not a metrology-grade 3D scan.</p>`;
+ host.insertAdjacentElement('afterend',panel);
+ let selectedDetection=null;
+ const readout=byId('scanGeometryReadout'),apply=byId('applyScanEstimateBtn');
+ function fmt(n){return Number.isFinite(n)?n.toFixed(2):'—';}
+ function update(){
+  if(!selectedDetection){readout.textContent='Analyze a photo, then select a detection.';apply.disabled=true;return;}
+  const [x,y,w,h]=selectedDetection.bbox;
+  const ratio=w/Math.max(1,h),kw=Number(byId('scanKnownWidth').value),kh=Number(byId('scanKnownHeight').value);
+  const lines=[
+   'Detected class: '+selectedDetection.class+' · confidence '+Math.round(selectedDetection.score*100)+'%',
+   'Bounding box: '+Math.round(w)+' × '+Math.round(h)+' px',
+   'Visible width : height ratio = '+fmt(ratio)+':1'
+  ];
+  if(kw>0) lines.push('Width-calibrated visible height ≈ '+fmt(kw/Math.max(ratio,.001))+' cm');
+  if(kh>0) lines.push('Height-calibrated visible width ≈ '+fmt(kh*ratio)+' cm');
+  if(kw>0&&kh>0)lines.push('Calibration consistency: '+fmt(Math.abs(kw/Math.max(ratio,.001)-kh))+' cm height difference');
+  readout.replaceChildren(...lines.map(t=>{const p=document.createElement('div');p.textContent=t;return p;}));
+  apply.disabled=!(kw>0||kh>0);
+ }
+ byId('scanKnownWidth').addEventListener('input',update);byId('scanKnownHeight').addEventListener('input',update);
+ apply.addEventListener('click',()=>{
+  if(!selectedDetection)return;
+  const [x,y,w,h]=selectedDetection.bbox,kw=Number(byId('scanKnownWidth').value),kh=Number(byId('scanKnownHeight').value);
+  let width=kw>0?kw:(kh>0?kh*w/Math.max(h,1):0);
+  let height=kh>0?kh:(kw>0?kw*h/Math.max(w,1):0);
+  if(!(width>0&&height>0))return;
+  byId('objectLength').value=Math.max(1,Math.round(width*10)/10);
+  byId('objectHeight').value=Math.max(1,Math.round(height*10)/10);
+  byId('objectDepth').value=byId('objectDepth').value||'10';
+  status('Visible-plane estimate copied to project dimensions. Measure depth separately; it cannot be inferred from one photo.');
+ });
+ // Keep a reference to the currently selected detection without replacing existing selection behavior.
+ const originalAnalyze=analyze;
+ // Selection chips are created after model inference, so observe chip clicks and match by displayed class.
+ const observer=new MutationObserver(()=>{
+  const chips=host.querySelectorAll('.detection-chip');
+  chips.forEach((chip)=>{
+   if(chip.dataset.geometryBound)return;chip.dataset.geometryBound='1';
+   chip.addEventListener('click',()=>{
+    const cls=chip.querySelector('b')?.textContent;
+    selectedDetection=lastDetections.find(d=>d.class===cls)||null;update();
+   });
+  });
+  if(lastDetections.length&&!selectedDetection){selectedDetection=lastDetections[0];update();}
+ });
+ observer.observe(host,{childList:true,subtree:true});
+})();
