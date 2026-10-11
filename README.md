@@ -6,22 +6,22 @@ A phone-friendly browser prototype for exploring mechanical assemblies and simpl
 
 ## Current features
 - Full-screen 3D viewport, orbit, zoom, grid toggle and responsive layout.
-- Component library with grouped 3D geometry: blocks, cylinders, spheres, cones, rings, toothed gears, shafts, wheels, bearing rings/balls, washers, threaded bolts, springs, a DC motor, base plate, battery, LED, bulb, switch, resistor, IC chip and wire piece.
+- Component library with grouped 3D geometry: blocks, cylinders, spheres, cones, rings, toothed gears, shafts, wheels, bearing rings/balls, washers, threaded bolts, springs, a DC motor, base plate, battery, LED, bulb, switch, resistor, capacitor, diode, buzzer, light sensor, IC chip and snap-connect wire.
 - Select, drag-move, move in X/Y/Z, rotate around X/Y/Z, scale, duplicate, delete, recolour and undo.
 - Approximate length/height/width controls in millimetres. The scale is illustrative (1 scene unit = 10 mm), not certified CAD dimensions.
 - Assembly connection mode: tap one part, then another to add a visible connector link. Links are saved with the project.
-- Learning circuit demo: add a battery, switch, resistor and LED or bulb; connect the four parts into a loop (each has two links); turn the switch ON; press Run circuit. The light mesh glows when the demo's connection checks pass. Stop the simulation to turn the glow off.
+- Circuit graph engine: connect component terminals directly or use wires; wire endpoints can snap to nearby free terminals. Closed paths through a battery, switch, resistor and one or more LEDs/bulbs power the lights. DC motor loops animate the motor shaft; a connected buzzer gets a visible active state. Capacitors block the simplified steady-DC path and diodes are directional.
 - Save/load uses localStorage in the current browser on the current device.
 
 ## Use the circuit demo
-1. Add a battery, switch, resistor and LED or bulb.
-2. Turn **Connect parts** on. Tap pairs to make these links: battery–switch, switch–resistor, resistor–LED/bulb, LED/bulb–battery.
-3. Select the switch and tap **Toggle switch** until it is ON.
-4. Press **Run circuit**. A complete loop should glow; an incomplete loop shows a status message.
-5. Press **Stop** to stop the simulation.
+1. Add a battery, switch, resistor, and one or more LEDs/bulbs.
+2. Turn **Connect parts** on and connect the terminals in a closed loop, or add a wire and drag an endpoint close to a free terminal to snap it on.
+3. Select the switch and tap **Switch ON/OFF** until it is ON.
+4. Press **Run**. All lamps in a detected closed path glow; an incomplete path displays a status message.
+5. Press **Stop** to turn the simulated outputs off.
 
 ## Limitations
-This is a learning prototype, not a manufacturing-grade CAD system or a validated electrical simulator. Parts and dimensions are approximate; connection links are visual assembly/electrical links rather than physical constraints; no true collision solver, mesh export, circuit voltage/current calculation, component datasheets or electrical safety checking is implemented. A glowing lamp demonstrates simple circuit logic only and does not guarantee a real circuit will work safely.
+This is a learning prototype, not a manufacturing-grade CAD system or a validated electrical simulator. Parts and dimensions are approximate; the circuit engine checks terminal connectivity and simple DC path logic, but it does not calculate numeric voltage/current, resistor power, transient capacitor behavior, real diode curves, component datasheets or electrical safety. Mechanical links are visual rather than physical constraints; no true collision solver or mesh export is implemented. A glowing lamp demonstrates the model's circuit logic only and does not guarantee a real circuit will work safely.
 
 ## Development
 The page loads Three.js and OrbitControls from jsDelivr CDN, so the first load requires internet access. It is a static GitHub Pages site; no build step is required.
