@@ -42,6 +42,15 @@
       </div>
     </section>
 
+    <section class="card sketch-card">
+      <div class="section-head"><div><h2>Draw your own part</h2><p>Sketch a closed outline, then extrude it into a 3D component.</p></div><span>CAD LAB</span></div>
+      <label class="sketch-name">Part name<input id="customPartName" maxlength="40" value="My custom part" placeholder="e.g. Robot chassis"></label>
+      <canvas id="partSketch" width="520" height="220" aria-label="Draw a custom part outline"></canvas>
+      <div class="sketch-actions"><button id="clearSketchBtn">Clear sketch</button><label>Thickness <input id="customThickness" type="number" min="1" max="100" value="10"> mm</label></div>
+      <button id="createCustomPartBtn" class="wide primary">＋ Create 3D part</button>
+      <p class="sketch-note">Draw one closed-ish outline with your finger or mouse. This creates an extruded 3D shape; holes, curves and multi-piece drawings are not yet supported.</p>
+    </section>
+
     <details class="card advanced">
       <summary>Advanced part controls <span>Move · rotate · dimensions · colour</span></summary>
       <div class="advanced-body">
