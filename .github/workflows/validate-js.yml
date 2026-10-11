@@ -1,0 +1,18 @@
+name: Validate JavaScript
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, feature/immersive-room-animation]
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check app module syntax
+        run: node --check --input-type=module < app.js
+      - name: Check room lab module syntax
+        run: node --check --input-type=module < room-lab.js
