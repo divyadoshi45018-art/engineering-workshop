@@ -50,3 +50,15 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:12px;max-width:1
 #freezeSketchBtn.active{background:var(--accent);color:#071812;border-color:var(--accent);font-weight:800}.sketch-actions{flex-wrap:wrap}.sketch-actions button{font-size:10px;padding:7px 8px}
 
 .part-group{min-width:0}.part-group summary{font-size:9px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);font-weight:850;margin:0 0 7px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;padding:4px 0}.part-group summary::-webkit-details-marker{display:none}.part-group summary::after{content:'＋';font-size:13px;color:var(--accent)}.part-group[open] summary::after{content:'−'}.part-group:not([open]){padding-bottom:2px}.part-group .parts-grid{padding-top:3px}
+
+
+/* Object geometry estimator: compact, readable on mobile screens. */
+.geometry-estimate-panel{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#0d1723}
+.geometry-estimate-panel h3{margin:0 0 7px;font-size:15px}
+.geometry-estimate-panel>p{color:var(--muted);font-size:12px;line-height:1.5;margin:6px 0 12px}
+.geometry-estimate-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.geometry-estimate-grid label{display:grid;gap:5px;color:var(--muted);font-size:12px}
+.geometry-estimate-grid input{width:100%;min-width:0;background:#080f18;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}
+.scan-geometry-readout{display:grid;gap:5px;margin:12px 0;padding:10px;background:#111f2d;border-radius:8px;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+#applyScanEstimateBtn:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:420px){.geometry-estimate-grid{grid-template-columns:1fr}}
