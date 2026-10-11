@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 const $ = s => document.querySelector(s);
 // Standard-sized component library. Dimensions are nominal illustrative mm; verify datasheets for fabrication.
@@ -359,6 +361,40 @@ $('#fullscreenBtn').addEventListener('click',()=>{viewportWrap.classList.toggle(
 $('#orbitViewBtn').addEventListener('click',()=>setViewMode('orbit'));
 $('#walkViewBtn').addEventListener('click',()=>setViewMode('walk'));
 $('#roomModelInput').addEventListener('change',e=>{importRoomModel(e.target.files&&e.target.files[0]);e.target.value='';});
+$('#printablePartInput')?.addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(file)importPrintablePart(file);e.target.value='';});
+function importPrintablePart(file){
+ const ext=file.name.split('.').pop().toLowerCase(),url=URL.createObjectURL(file);
+ const fail=err=>{URL.revokeObjectURL(url);console.error(err);say('Could not import model. Try a valid STL, OBJ, GLB or GLTF file.');};
+ const addModel=model=>{
+  try{
+   const group=new THREE.Group();group.name=file.name.replace(/\.[^.]+$/,'');
+   group.add(model);
+   group.updateMatrixWorld(true);
+   let box=new THREE.Box3().setFromObject(group);
+   if(box.isEmpty())throw new Error('Model has no visible geometry');
+   const center=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());
+   group.position.sub(center);
+   const largest=Math.max(size.x,size.y,size.z)||1;
+   group.scale.setScalar(2.2/largest);
+   group.position.set((parts.length%4-1.5)*1.7,.8,Math.floor(parts.length/4)*1.55);
+   group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(!o.material)o.material=material(0x8ca4bb,.35,.4);}});
+   group.userData.isPart=true;group.userData.type='imported';group.userData.name=group.name;group.userData.id=nextId++;group.userData.tint=0x8ca4bb;
+   scene.add(group);group.updateMatrixWorld(true);
+   const b2=new THREE.Box3().setFromObject(group),sz=b2.getSize(new THREE.Vector3());
+   group.userData.baseSize.set(Math.max(.05,sz.x),Math.max(.05,sz.y),Math.max(.05,sz.z));
+   checkpoint();parts.push(group);select(group);updateCounts();refreshConnectionVisuals();
+   say('Imported 3D model: '+group.userData.name+' · normalized to fit the bench');
+  }catch(err){fail(err);}
+  URL.revokeObjectURL(url);
+ };
+ try{
+  if(ext==='stl')new STLLoader().load(url,geometry=>{geometry.computeVertexNormals();const mesh=new THREE.Mesh(geometry,material(0x9baaba,.65,.3));addModel(mesh);},undefined,fail);
+  else if(ext==='obj')new OBJLoader().load(url,addModel,undefined,fail);
+  else if(ext==='glb'||ext==='gltf')new GLTFLoader().load(url,gltf=>addModel(gltf.scene),undefined,fail);
+  else fail(new Error('Unsupported file type'));
+ }catch(err){fail(err);}
+}
+
 window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)&&viewMode==='walk'){walkKeys.add(k);e.preventDefault();}});
 window.addEventListener('keyup',e=>walkKeys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>walkKeys.clear());
