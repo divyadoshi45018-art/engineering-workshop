@@ -46,3 +46,5 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:12px;max-width:1
 .model-source-links{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:10px;padding:9px;background:#0d1722;border:1px solid var(--line);border-radius:8px;font-size:10px}
 .model-source-links b{width:100%;color:var(--muted)}
 .model-source-links a{color:var(--blue);text-decoration:underline;text-underline-offset:2px}
+
+#freezeSketchBtn.active{background:var(--accent);color:#071812;border-color:var(--accent);font-weight:800}.sketch-actions{flex-wrap:wrap}.sketch-actions button{font-size:10px;padding:7px 8px}
