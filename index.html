@@ -19,9 +19,11 @@
       <div class="bench-head"><div><strong>3D BENCH</strong><span id="partCount">0 parts</span></div><div class="bench-actions"><button id="resetViewBtn">Reset view</button><button id="gridBtn">Grid: ON</button></div></div>
       <div class="viewport-wrap" id="viewportWrap">
         <div id="viewport" aria-label="Interactive 3D engineering workspace"></div>
-        <div class="view-hint">Drag to orbit · pinch to zoom · tap a part to select</div>
+        <div class="view-hint" id="viewHintText">Orbit: drag to rotate · pinch to zoom · tap a part to select</div>
+        <div class="walk-pad" id="walkPad" hidden aria-label="First person movement controls"><button data-walk="w">▲</button><div><button data-walk="a">◀</button><button data-walk="s">▼</button><button data-walk="d">▶</button></div></div>
         <div id="status" role="status">Loading workshop…</div>
       </div>
+      <div class="immersive-toolbar"><button id="orbitViewBtn" class="active">Orbit / CAD</button><button id="walkViewBtn">First-person</button><label class="import-room">Import room scan <input id="roomModelInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json"></label></div><p id="roomInfo" class="room-info">Import a room scan (.glb/.gltf) to explore your actual workspace in 3D.</p>
       <div class="quickbar">
         <button id="undoBtn" disabled>↶ Undo</button><button id="moveBtn">✥ Move part</button><button id="duplicateBtn">Duplicate</button><button id="deleteBtn" class="danger">Delete</button><button id="clearBtn" class="danger-outline">Clear bench</button>
       </div>
