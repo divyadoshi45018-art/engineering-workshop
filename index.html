@@ -23,7 +23,7 @@
         <div class="walk-pad" id="walkPad" hidden aria-label="First person movement controls"><button data-walk="w">▲</button><div><button data-walk="a">◀</button><button data-walk="s">▼</button><button data-walk="d">▶</button></div></div>
         <div id="status" role="status">Loading workshop…</div>
       </div>
-      <div class="immersive-toolbar"><button id="orbitViewBtn" class="active">Orbit / CAD</button><button id="walkViewBtn">First-person</button><label class="import-room">Import room scan <input id="roomModelInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json"></label></div><p id="roomInfo" class="room-info">Import a room scan (.glb/.gltf) to explore your actual workspace in 3D.</p>
+      <div class="immersive-toolbar"><button id="orbitViewBtn" class="active">Orbit / CAD</button><button id="walkViewBtn">First-person</button><label class="import-room">Import room scan <input id="roomModelInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json"></label><label class="import-room">Import printable part <input id="printablePartInput" type="file" accept=".stl,.obj,.glb,.gltf,model/stl,model/obj,model/gltf-binary,model/gltf+json"></label></div><p id="roomInfo" class="room-info">Import a room scan (.glb/.gltf) to explore your actual workspace in 3D.</p>
       <div class="quickbar">
         <button id="undoBtn" disabled>↶ Undo</button><button id="moveBtn">✥ Move part</button><button id="duplicateBtn">Duplicate</button><button id="deleteBtn" class="danger">Delete</button><button id="clearBtn" class="danger-outline">Clear bench</button>
       </div>
@@ -45,7 +45,30 @@
     </section>
 
     <section class="card catalog-card"><div class="section-head"><div><h2>Mechanical parts library</h2><p>412+ named components · select to add</p></div><span>MM SPEC</span></div><input id="catalogSearch" class="catalog-search" type="search" placeholder="Search screws, M6 bolts, bearings, gears…"><div class="catalog-filters" id="catalogFilters"></div><div class="catalog-results" id="catalogResults"></div><p class="sketch-note">Dimensions shown are nominal reference sizes in mm. Generic catalogue geometry is an educational visual approximation, not a certified manufacturer model. Check the actual part datasheet before fabrication.</p></section>
-    <section class="card sketch-card">
+
+    <section class="card room-lab-card" id="roomLab">
+      <div class="section-head"><div><h2>Room Object Scanner + Project Lab</h2><p>Photograph an object, identify it, then plan a build around it.</p></div><span>VISION LAB</span></div>
+      <div class="scan-actions"><label class="scan-file">Choose photo <input id="objectPhotoInput" type="file" accept="image/*" capture="environment"></label><button id="startObjectCameraBtn">Use camera</button><button id="captureObjectBtn" disabled>Capture</button><button id="stopObjectCameraBtn" disabled>Stop camera</button></div>
+      <video id="objectCameraPreview" playsinline autoplay muted hidden></video>
+      <canvas id="objectPhotoCanvas" hidden></canvas>
+      <div id="objectPreviewWrap" hidden><img id="objectPreview" alt="Object to analyze"><p id="visionStatus" role="status">Ready to analyze.</p></div>
+      <button id="analyzeObjectBtn" class="wide primary" disabled>🔎 Identify object in photo</button>
+      <p class="sketch-note">Vision runs in your browser using a general object-detection model. It can recognize common object classes, not every object or its exact measurements. A photo alone is not a 3D scan.</p>
+      <div id="objectDetections" class="object-detections"></div>
+      <div class="object-dimensions">
+        <label>Object / project target<input id="objectTargetName" maxlength="80" placeholder="e.g. desk drawer, chair, door"></label>
+        <div class="dimension-grid">
+          <label>Length cm<input id="objectLength" type="number" min="1" max="1000" value="60"></label>
+          <label>Height cm<input id="objectHeight" type="number" min="1" max="1000" value="75"></label>
+          <label>Depth cm<input id="objectDepth" type="number" min="1" max="1000" value="40"></label>
+        </div>
+        <label>What do you want to do with it?<textarea id="objectGoal" rows="2" placeholder="e.g. make it open automatically, add lights, monitor it, repair it, or build a robot around it"></textarea></label>
+        <button id="generateObjectProjectBtn" class="wide">⚙ Analyze object + generate project plan</button>
+      </div>
+      <div id="objectProjectOutput" class="object-project-output" aria-live="polite"></div>
+      <p class="sketch-note">For a scaled room model, use a room-scanning app to export a .glb/.gltf file and import it above. For printable parts, download a model you have permission to use from a 3D model library and import its .stl/.obj/.glb file.</p>
+    </section>
+\n    <section class="card sketch-card">
       <div class="section-head"><div><h2>Draw your own part</h2><p>Sketch a closed outline, then extrude it into a 3D component.</p></div><span>CAD LAB</span></div>
       <label class="sketch-name">Part name<input id="customPartName" maxlength="40" value="My custom part" placeholder="e.g. Robot chassis"></label>
       <canvas id="partSketch" width="520" height="220" aria-label="Draw a custom part outline"></canvas>
