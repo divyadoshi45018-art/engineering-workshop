@@ -28,7 +28,7 @@ function setViewMode(mode){
  $('#viewHintText').textContent=viewMode==='walk'?'Walk: WASD / arrow keys · drag to look · tap Move pad on phone':'Orbit: drag to rotate · pinch to zoom · tap a part to select';
  if(viewMode==='walk'){
   const direction=new THREE.Vector3();camera.getWorldDirection(direction);
-  walkState.yaw=Math.atan2(direction.x,direction.z);
+  walkState.yaw=Math.atan2(-direction.x,-direction.z);
   walkState.pitch=Math.asin(THREE.MathUtils.clamp(direction.y,-1,1));
   camera.rotation.order='YXZ';camera.rotation.y=walkState.yaw;camera.rotation.x=walkState.pitch;
   say('First-person mode · use WASD or the on-screen pad');
@@ -44,8 +44,8 @@ function moveWalker(dt){
  const forward=(walkKeys.has('w')||walkKeys.has('arrowup')?1:0)-(walkKeys.has('s')||walkKeys.has('arrowdown')?1:0);
  const side=(walkKeys.has('d')||walkKeys.has('arrowright')?1:0)-(walkKeys.has('a')||walkKeys.has('arrowleft')?1:0);
  if(!forward&&!side)return;
- const speed=3.2*dt, fwd=new THREE.Vector3(Math.sin(walkState.yaw),0,Math.cos(walkState.yaw)), right=new THREE.Vector3(fwd.z,0,-fwd.x);
- camera.position.addScaledVector(fwd,-forward*speed);camera.position.addScaledVector(right,side*speed);
+ const speed=3.2*dt, fwd=new THREE.Vector3(-Math.sin(walkState.yaw),0,-Math.cos(walkState.yaw)), right=new THREE.Vector3(-fwd.z,0,fwd.x);
+ camera.position.addScaledVector(fwd,forward*speed);camera.position.addScaledVector(right,side*speed);
  camera.position.y=Math.max(.25,Math.min(2.2,camera.position.y));
 }
 function importRoomModel(file){
