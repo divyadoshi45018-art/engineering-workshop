@@ -23,7 +23,8 @@
         <div class="walk-pad" id="walkPad" hidden aria-label="First person movement controls"><button data-walk="w">▲</button><div><button data-walk="a">◀</button><button data-walk="s">▼</button><button data-walk="d">▶</button></div></div>
         <div id="status" role="status">Loading workshop…</div>
       </div>
-      <div class="immersive-toolbar"><button id="orbitViewBtn" class="active">Orbit / CAD</button><button id="walkViewBtn">First-person</button><label class="import-room">Import room scan <input id="roomModelInput" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json"></label><label class="import-room">Import printable part <input id="printablePartInput" type="file" accept=".stl,.obj,.glb,.gltf,model/stl,model/obj,model/gltf-binary,model/gltf+json"></label></div><p id="roomInfo" class="room-info">Import a room scan (.glb/.gltf) to explore your actual workspace in 3D.</p>
+      <div class="immersive-toolbar"><button id="orbitViewBtn" class="active">Orbit / CAD</button><button id="walkViewBtn">First-person</button><label class="import-room">Import room scan <input id="roomModelInput" type="file" accept=".glb,.gltf,.obj,.stl,model/gltf-binary,model/gltf+json,model/obj,model/stl"></label><label class="import-room">Import printable part <input id="printablePartInput" type="file" accept=".stl,.obj,.glb,.gltf,model/stl,model/obj,model/gltf-binary,model/gltf+json"></label></div><p id="roomInfo" class="room-info">Import a room scan (.glb/.gltf recommended, also .obj/.stl) to explore your actual workspace in 3D.</p>
+      <div class="room-scan-connect"><a class="room-scan-link" href="https://poly.cam/tools/3d-room-scanner" target="_blank" rel="noopener noreferrer">📱 Open Polycam Room Scanner ↗</a><span>Scan your room there, export a 3D mesh (GLB preferred), return here and use “Import room scan”. No account/API connection is assumed.</span></div>
       <div class="quickbar">
         <button id="undoBtn" disabled>↶ Undo</button><button id="moveBtn">✥ Move part</button><button id="duplicateBtn">Duplicate</button><button id="deleteBtn" class="danger">Delete</button><button id="clearBtn" class="danger-outline">Clear bench</button>
       </div>
@@ -63,7 +64,7 @@
           <label>Depth cm<input id="objectDepth" type="number" min="1" max="1000" value="40"></label>
         </div>
         <label>What do you want to do with it?<textarea id="objectGoal" rows="2" placeholder="e.g. make it open automatically, add lights, monitor it, repair it, or build a robot around it"></textarea></label>
-        <button id="generateObjectProjectBtn" class="wide">⚙ Analyze object + generate project plan</button>
+        <button id="generateObjectProjectBtn" class="wide">⚙ Analyze object + generate project plan</button><button id="addDetectedObjectToBenchBtn" class="wide primary">＋ Add object reference to 3D bench</button>
       </div>
       <div id="objectProjectOutput" class="object-project-output" aria-live="polite"></div>
       <p class="sketch-note">For a scaled room model, use a room-scanning app to export a .glb/.gltf file and import it above. For printable parts, download a model you have permission to use and import its .stl/.obj/.glb file.</p><div class="model-source-links"><b>3D model libraries</b><a href="https://www.printables.com/" target="_blank" rel="noopener noreferrer">Printables</a><a href="https://www.thingiverse.com/" target="_blank" rel="noopener noreferrer">Thingiverse</a><a href="https://makerworld.com/" target="_blank" rel="noopener noreferrer">MakerWorld</a><a href="https://grabcad.com/library" target="_blank" rel="noopener noreferrer">GrabCAD Library</a></div>
@@ -108,7 +109,7 @@
   </aside>
 </main>
 <footer>Approximate visual dimensions · no collision solver or manufacturing-grade CAD · needs internet for the 3D engine.</footer>
-<script type="module" src="./app.js?v=20261012b"></script>
-<script type="module" src="./room-lab.js?v=20261012a"></script>
+<script type="module" src="./app.js?v=20261012c"></script>
+<script type="module" src="./room-lab.js?v=20261012c"></script>
 </body>
 </html>
