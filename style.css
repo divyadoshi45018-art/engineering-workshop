@@ -62,3 +62,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:12px;max-width:1
 .scan-geometry-readout{display:grid;gap:5px;margin:12px 0;padding:10px;background:#111f2d;border-radius:8px;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 #applyScanEstimateBtn:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:420px){.geometry-estimate-grid{grid-template-columns:1fr}}
+
+.room-scan-connect{display:grid;gap:7px;margin:8px 0 12px;padding:11px;border:1px solid var(--line);border-radius:10px;background:#0c1722}
+.room-scan-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:8px;background:#19352f;color:#a7ffe6;font-weight:800;text-decoration:none;border:1px solid #356657}
+.room-scan-connect span{font-size:11px;line-height:1.5;color:var(--muted)}
