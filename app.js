@@ -63,16 +63,28 @@ function moveWalker(dt){
 }
 function importRoomModel(file){
  if(!file)return;
- const url=URL.createObjectURL(file);
- roomLoader.load(url,gltf=>{
-  if(roomModel)scene.remove(roomModel);
-  roomModel=gltf.scene;roomModel.name='Imported room scan';
-  roomModel.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material)o.material.side=THREE.DoubleSide;}});
-  const box=new THREE.Box3().setFromObject(roomModel),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
-  roomModel.position.sub(center);roomModel.position.y-=box.min.y;scene.add(roomModel);URL.revokeObjectURL(url);
-  $('#roomInfo').textContent='Room model loaded · '+size.x.toFixed(2)+' × '+size.y.toFixed(2)+' × '+size.z.toFixed(2)+' scene units';
-  say('Room model imported. Use Orbit to inspect or First person to explore.');
- },undefined,error=>{URL.revokeObjectURL(url);console.error(error);say('Could not load this model. Try a valid .glb or .gltf file.');});
+ const url=URL.createObjectURL(file),ext=file.name.split('.').pop().toLowerCase();
+ const fail=error=>{URL.revokeObjectURL(url);console.error(error);say('Could not load scan. Try a valid GLB, GLTF, OBJ or STL file; GLB is best for textured room scans.');};
+ const ready=model=>{
+  try{
+   if(roomModel)scene.remove(roomModel);
+   roomModel=model;roomModel.name='Imported room scan';
+   roomModel.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material)o.material.side=THREE.DoubleSide;}});
+   roomModel.updateMatrixWorld(true);
+   const box=new THREE.Box3().setFromObject(roomModel),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+   if(box.isEmpty())throw new Error('Scan has no mesh geometry');
+   roomModel.position.sub(center);roomModel.position.y-=box.min.y;scene.add(roomModel);
+   URL.revokeObjectURL(url);
+   $('#roomInfo').textContent='Room model loaded · '+size.x.toFixed(2)+' × '+size.y.toFixed(2)+' × '+size.z.toFixed(2)+' scene units · '+ext.toUpperCase();
+   say('Room scan imported. Use Orbit to inspect or First person to explore. Parts can be added to the same scene.');
+  }catch(error){fail(error);}
+ };
+ try{
+  if(ext==='glb'||ext==='gltf')roomLoader.load(url,gltf=>ready(gltf.scene),undefined,fail);
+  else if(ext==='obj')new OBJLoader().load(url,ready,undefined,fail);
+  else if(ext==='stl')new STLLoader().load(url,geometry=>{geometry.computeVertexNormals();ready(new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:0x9baaba,roughness:.8,side:THREE.DoubleSide})));},undefined,fail);
+  else fail(new Error('Unsupported room scan format'));
+ }catch(error){fail(error);}
 }
 
 scene.add(new THREE.HemisphereLight(0xdbeaff,0x263142,2.1));
@@ -312,6 +324,25 @@ function autoSnapWire(wire){if(!wire||wire.userData.type!=='wire')return;const u
 function electronic(p){return electrical(p);}
 function add(type){checkpoint();let pos=null;if(type==='wire'){const anchor=(selected&&electrical(selected))?selected:parts.find(p=>p.userData.type==='battery')||parts.find(electrical);if(anchor)pos=anchor.position.clone().add(new THREE.Vector3(.8,0,0));}const p=createPart(type,pos);if(type==='wire')autoSnapWire(p);updateCounts();if(simulationRunning)refreshSimulation();return p;}
 document.querySelectorAll('[data-part]').forEach(b=>b.addEventListener('click',()=>add(b.dataset.part)));
+window.addEventListener('workshop:add-detected-object',e=>{
+ const d=e.detail||{},name=String(d.name||'Recognized object').slice(0,80);
+ const cm=[Number(d.lengthCm),Number(d.heightCm),Number(d.depthCm)];
+ if(cm.some(v=>!Number.isFinite(v)||v<=0||v>1000)){say('Enter positive object dimensions in cm before adding a reference.');return;}
+ checkpoint();
+ const p=createPart('box');
+ if(!p)return;
+ const dims=cm.map(v=>Math.max(.08,Math.min(100,v/10)));
+ const b=p.userData.baseSize;
+ p.scale.set(dims[0]/b.x,dims[1]/b.y,dims[2]/b.z);
+ p.userData.name=name+' · photo reference';
+ p.userData.referenceObject=true;
+ p.userData.recognitionConfidence=Number(d.confidence)||0;
+ p.userData.baseSize.set(dims[0],dims[1],dims[2]);
+ p.position.set((parts.length%4-1.5)*1.7,dims[1]/2,Math.floor(parts.length/4)*1.55);
+ select(p);updateCounts();refreshConnectionVisuals();
+ say('Added scaled box reference for '+name+'. This is a dimension-based proxy, not a reconstructed 3D scan.');
+});
+
 
 // Searchable folder-style catalogue with explicit nominal dimensions.
 let activeCatalogCategory='All';
