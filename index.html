@@ -72,7 +72,7 @@
       <div class="section-head"><div><h2>Draw your own part</h2><p>Sketch a closed outline, then extrude it into a 3D component.</p></div><span>CAD LAB</span></div>
       <label class="sketch-name">Part name<input id="customPartName" maxlength="40" value="My custom part" placeholder="e.g. Robot chassis"></label>
       <canvas id="partSketch" width="520" height="220" aria-label="Draw a custom part outline"></canvas>
-      <div class="sketch-actions"><button id="smartFixSketchBtn">✧ Smart fix</button><button id="drawCircleBtn">◯ Circle</button><button id="drawRectBtn">▭ Rectangle</button><button id="drawTriangleBtn">△ Triangle</button><button id="undoStrokeBtn">↶ Undo stroke</button><button id="freezeSketchBtn">Freeze sketch</button><button id="clearSketchBtn">Clear sketch</button><label>Thickness <input id="customThickness" type="number" min="1" max="100" value="10"> mm</label></div>
+      <div class="sketch-actions"><button id="smartFixSketchBtn">✧ Smart fix</button><button id="drawCircleBtn">◯ Circle</button><button id="drawRectBtn">▭ Rectangle</button><button id="drawTriangleBtn">△ Triangle</button><button id="undoStrokeBtn">↶ Clear outline</button><button id="smoothSketchBtn">〰 Smooth</button><button id="snapSketchBtn">▦ Snap grid</button><button id="freezeSketchBtn">Freeze sketch</button><button id="clearSketchBtn">Clear sketch</button><label>Thickness <input id="customThickness" type="number" min="1" max="100" value="10"> mm</label></div>
       <button id="createCustomPartBtn" class="wide primary">＋ Create 3D part</button>
       <p class="sketch-note">Draw one closed-ish outline with your finger or mouse. This creates an extruded 3D shape; holes, curves and multi-piece drawings are not yet supported.</p>
     </section>
@@ -108,7 +108,7 @@
   </aside>
 </main>
 <footer>Approximate visual dimensions · no collision solver or manufacturing-grade CAD · needs internet for the 3D engine.</footer>
-<script type="module" src="./app.js?v=20261012a"></script>
+<script type="module" src="./app.js?v=20261012b"></script>
 <script type="module" src="./room-lab.js?v=20261012a"></script>
 </body>
 </html>
