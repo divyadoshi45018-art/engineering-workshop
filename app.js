@@ -340,6 +340,25 @@ $('#drawCircleBtn').addEventListener('click',()=>fitPresetShape('circle'));
 $('#drawRectBtn').addEventListener('click',()=>fitPresetShape('rectangle'));
 $('#drawTriangleBtn').addEventListener('click',()=>fitPresetShape('triangle'));
 $('#undoStrokeBtn').addEventListener('click',()=>{if(sketchFrozen)return say('Unfreeze the sketch before editing');if(!sketchPoints.length)return say('Nothing to undo');sketchPoints=[];paintSketch();say('Last sketch stroke removed');});
+$('#smoothSketchBtn').addEventListener('click',()=>{
+ if(sketchFrozen)return say('Unfreeze the sketch before editing');
+ if(sketchPoints.length<5)return say('Draw a longer outline first');
+ const src=sketchPoints.map(p=>({...p})),closed=Math.hypot((src[0].x-src[src.length-1].x)*sketch.width,(src[0].y-src[src.length-1].y)*sketch.height)<Math.min(sketch.width,sketch.height)*.12;
+ sketchPoints=src.map((p,i)=>{
+  if(!closed&&(i===0||i===src.length-1))return p;
+  const prev=src[(i-1+src.length)%src.length],next=src[(i+1)%src.length];
+  return {x:p.x*.5+(prev.x+next.x)*.25,y:p.y*.5+(prev.y+next.y)*.25};
+ });
+ paintSketch();say('Stroke smoothed · use Smart fix to regularize the shape');
+});
+$('#snapSketchBtn').addEventListener('click',()=>{
+ if(sketchFrozen)return say('Unfreeze the sketch before editing');
+ if(sketchPoints.length<3)return say('Draw an outline first');
+ const step=.025;
+ sketchPoints=sketchPoints.map(p=>({x:Math.max(0,Math.min(1,Math.round(p.x/step)*step)),y:Math.max(0,Math.min(1,Math.round(p.y/step)*step))}));
+ paintSketch();say('Outline snapped to the sketch grid');
+});
+
 
 function correctedOutline(input){
  const pts=input.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>({x:Math.max(0,Math.min(1,p.x)),y:Math.max(0,Math.min(1,p.y))}));
