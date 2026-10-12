@@ -62,6 +62,14 @@ function renderProject(){
  out.append(heading,intro,dims,ideaTitle,ideas,partsTitle,parts,stepsTitle,steps,warning,start,copy);
 }
 byId('generateObjectProjectBtn')?.addEventListener('click',renderProject);
+byId('addDetectedObjectToBenchBtn')?.addEventListener('click',()=>{
+ const name=byId('objectTargetName')?.value.trim()||lastDetections[0]?.class||'Object reference';
+ const lengthCm=Number(byId('objectLength')?.value),heightCm=Number(byId('objectHeight')?.value),depthCm=Number(byId('objectDepth')?.value);
+ if([lengthCm,heightCm,depthCm].some(v=>!Number.isFinite(v)||v<=0))return status('Enter positive length, height and depth in cm first.');
+ window.dispatchEvent(new CustomEvent('workshop:add-detected-object',{detail:{name,lengthCm,heightCm,depthCm,confidence:lastDetections[0]?.score||0}}));
+ status('Sent '+name+' to the 3D bench as a dimension-based reference box. For real surface geometry, import a room/object scan.');
+});
+
 async function analyze(){
  if(!photoReady)return status('Choose a photo or capture one first.');
  analyzeBtn.disabled=true;
@@ -69,7 +77,7 @@ async function analyze(){
   const original=ctx.getImageData(0,0,canvas.width,canvas.height);
   const model=await loadDetector();
   ctx.putImageData(original,0,0);
-  const predictions=await model.detect(canvas,20,.35);
+  const predictions=await model.detect(canvas,30,.25);
   lastDetections=predictions.sort((a,b)=>b.score-a.score);
   ctx.putImageData(original,0,0);
   drawDetections(lastDetections);
