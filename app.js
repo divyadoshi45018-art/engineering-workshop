@@ -73,7 +73,7 @@ function importRoomModel(file){
    roomModel.updateMatrixWorld(true);
    const box=new THREE.Box3().setFromObject(roomModel),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
    if(box.isEmpty())throw new Error('Scan has no mesh geometry');
-   roomModel.position.sub(center);roomModel.position.y-=box.min.y;scene.add(roomModel);
+   roomModel.position.sub(center);roomModel.position.y+=size.y/2;scene.add(roomModel);
    URL.revokeObjectURL(url);
    $('#roomInfo').textContent='Room model loaded · '+size.x.toFixed(2)+' × '+size.y.toFixed(2)+' × '+size.z.toFixed(2)+' scene units · '+ext.toUpperCase();
    say('Room scan imported. Use Orbit to inspect or First person to explore. Parts can be added to the same scene.');
