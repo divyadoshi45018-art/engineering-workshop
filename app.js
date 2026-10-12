@@ -328,6 +328,19 @@ function stopSketch(){sketching=false;}sketch.addEventListener('pointerup',stopS
 $('#clearSketchBtn').addEventListener('click',()=>{if(sketchFrozen)return say('Unfreeze the sketch before clearing it');sketchPoints=[];paintSketch();say('Sketch cleared');});
 $('#smartFixSketchBtn').addEventListener('click',()=>{if(sketchPoints.length<3)return say('Draw a shape first');const result=correctedOutline(sketchPoints);sketchPoints=result.points;paintSketch();say('Smart correction applied: '+result.shape);});
 $('#freezeSketchBtn').addEventListener('click',()=>{sketchFrozen=!sketchFrozen;$('#freezeSketchBtn').textContent=sketchFrozen?'Unfreeze sketch':'Freeze sketch';$('#freezeSketchBtn').classList.toggle('active',sketchFrozen);say(sketchFrozen?'Sketch frozen — you can create the 3D part safely':'Sketch unlocked for editing');});
+function fitPresetShape(kind){
+ if(sketchFrozen)return say('Unfreeze the sketch before drawing a preset');
+ const margin=.16,cx=.5,cy=.5,rx=.34,ry=.34;
+ if(kind==='circle'||kind==='ellipse'){sketchPoints=[];for(let i=0;i<=96;i++){const t=i/96*Math.PI*2;sketchPoints.push({x:cx+Math.cos(t)*rx,y:cy+Math.sin(t)*(kind==='circle'?ry:ry*.68)});}say(kind==='circle'?'Perfect circle placed':'Ellipse placed');}
+ else if(kind==='rectangle'){sketchPoints=[{x:cx-rx,y:cy-ry*.72},{x:cx+rx,y:cy-ry*.72},{x:cx+rx,y:cy+ry*.72},{x:cx-rx,y:cy+ry*.72},{x:cx-rx,y:cy-ry*.72}];say('Exact rectangle placed');}
+ else if(kind==='triangle'){sketchPoints=[{x:cx,y:cy-ry},{x:cx+rx,y:cy+ry*.72},{x:cx-rx,y:cy+ry*.72},{x:cx,y:cy-ry}];say('Exact triangle placed');}
+ paintSketch();
+}
+$('#drawCircleBtn').addEventListener('click',()=>fitPresetShape('circle'));
+$('#drawRectBtn').addEventListener('click',()=>fitPresetShape('rectangle'));
+$('#drawTriangleBtn').addEventListener('click',()=>fitPresetShape('triangle'));
+$('#undoStrokeBtn').addEventListener('click',()=>{if(sketchFrozen)return say('Unfreeze the sketch before editing');if(!sketchPoints.length)return say('Nothing to undo');sketchPoints=[];paintSketch();say('Last sketch stroke removed');});
+
 function correctedOutline(input){
  const pts=input.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).map(p=>({x:Math.max(0,Math.min(1,p.x)),y:Math.max(0,Math.min(1,p.y))}));
  if(pts.length<3)return {points:pts,shape:'freeform'};
@@ -335,7 +348,7 @@ function correctedOutline(input){
  if(w<.025||h<.025)return {points:pts,shape:'freeform'};
  const distPx=(a,b)=>Math.hypot((a.x-b.x)*sketch.width,(a.y-b.y)*sketch.height);
  const closeThreshold=Math.max(18,Math.min(sketch.width,sketch.height)*.12);
- const closed=distPx(pts[0],pts[pts.length-1])<closeThreshold;
+ const closed=distPx(pts[0],pts[pts.length-1])<closeThreshold || (pts.length>=10 && distPx(pts[0],pts[pts.length-1])<closeThreshold*1.8);
  // Use the bounding-box centre, not the average stroke point: this works better for uneven hand-drawn circles.
  const cx=(minX+maxX)/2,cy=(minY+maxY)/2,rx=w/2,ry=h/2;
  const radial=pts.map(p=>Math.hypot((p.x-cx)/Math.max(rx,.001),(p.y-cy)/Math.max(ry,.001)));
@@ -368,6 +381,11 @@ function correctedOutline(input){
  let corners=simplify(closed?path.concat([path[0]]):path,.035);
  if(corners.length>1&&Math.hypot(corners[0].x-corners[corners.length-1].x,corners[0].y-corners[corners.length-1].y)<.08)corners=corners.slice(0,-1);
  if(closed&&corners.length===3)return {points:corners,shape:'triangle'};
+ if(closed&&corners.length>=4&&corners.length<=6){
+   const boxCorners=[{x:minX,y:minY},{x:maxX,y:minY},{x:maxX,y:maxY},{x:minX,y:maxY}];
+   const nearBox=path.every(p=>Math.min(Math.abs(p.x-minX),Math.abs(p.x-maxX),Math.abs(p.y-minY),Math.abs(p.y-maxY))<.07);
+   if(nearBox)return {points:boxCorners,shape:'rectangle'};
+ }
  if(closed&&corners.length===4){
    // Snap near-horizontal/vertical sides into a clean rectangle when its corners are close to the bounding box.
    const boxCorners=[{x:minX,y:minY},{x:maxX,y:minY},{x:maxX,y:maxY},{x:minX,y:maxY}];
